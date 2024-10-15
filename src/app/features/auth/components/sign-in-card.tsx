@@ -16,18 +16,15 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import Link from "next/link"
-
-// 입력 폼 유효성 검사(이름 / 이메일)
-const formSchema = z.object({
-  // 폼에서 요구하는 필드와 각 필드의 유효성 조건을 정의
-  email: z.string().email("이메일 주소를 입력하세요!"),
-  password: z.string().min(1, "비밀번호를 입력하세요!"),
-})
+import { loginSchema } from "../schema"
+import { useLogin } from "../api/use-login"
 
 const SignInCard = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const { mutate } = useLogin()
+
+  const form = useForm<z.infer<typeof loginSchema>>({
     // 유효성 검사
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(loginSchema),
     // 기본값 설정
     defaultValues: {
       email: "",
@@ -36,8 +33,8 @@ const SignInCard = () => {
   })
 
   // 로그인 처리
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ values })
+  const onSubmit = (values: z.infer<typeof loginSchema>) => {
+    mutate({ json: values })
   }
 
   return (

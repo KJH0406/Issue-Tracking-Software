@@ -23,19 +23,15 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form"
-
-// 입력 폼 유효성 검사(이름 / 이메일 / 비밀번호)
-const formSchema = z.object({
-  // 폼에서 요구하는 필드와 각 필드의 유효성 조건을 정의
-  name: z.string().trim().min(1, "이름을 입력하세요!"),
-  email: z.string().email("이메일 주소를 입력하세요!"),
-  password: z.string().min(8, "최소 8자 이상의 비밀번호를 입력하세요!"),
-})
+import { registerSchema } from "../schema"
+import { useRegister } from "../api/use-register"
 
 const SignUpCard = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const { mutate } = useRegister()
+
+  const form = useForm<z.infer<typeof registerSchema>>({
     // 유효성 검사
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(registerSchema),
     // 기본값 설정
     defaultValues: {
       name: "",
@@ -45,8 +41,8 @@ const SignUpCard = () => {
   })
 
   // 회원가입 처리
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ values })
+  const onSubmit = (values: z.infer<typeof registerSchema>) => {
+    mutate({ json: values })
   }
 
   return (
