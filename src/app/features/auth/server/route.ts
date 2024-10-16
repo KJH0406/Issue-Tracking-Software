@@ -1,7 +1,7 @@
 import { Hono } from "hono"
 import { ID } from "node-appwrite"
 import { zValidator } from "@hono/zod-validator"
-import { setCookie } from "hono/cookie"
+import { deleteCookie, setCookie } from "hono/cookie"
 
 import { createAdminClient } from "@/lib/appwrite"
 
@@ -17,9 +17,19 @@ const app = new Hono()
     async (c) => {
       const { email, password } = c.req.valid("json")
 
-      console.log({ email, password })
+      const { account } = await createAdminClient()
+      const session = await account.createEmailPasswordSession(email, password)
 
-      return c.json({ email, password })
+      // 로그인 후 세션 쿠키를 설정(인증된 상태를 유지)
+      setCookie(c, AUTH_COOKIE, session.secret, {
+        path: "/", // 모든 경로에서 유효
+        httpOnly: true, // XSS 방지
+        secure: true,
+        sameSite: "strict", // CSRF 방지
+        maxAge: 60 * 60 * 24 * 30, // 유효 기간 설정(30일)
+      })
+
+      return c.json({ success: true })
     }
   )
 
@@ -49,8 +59,15 @@ const app = new Hono()
         maxAge: 60 * 60 * 24 * 30, // 유효 기간 설정(30일)
       })
 
-      return c.json({ data: user })
+      return c.json({ success: true })
     }
   )
+
+  // 로그아웃 요청
+  .post("/logout", (c) => {
+    deleteCookie(c, AUTH_COOKIE)
+
+    return c.json({ success: true })
+  })
 
 export default app
