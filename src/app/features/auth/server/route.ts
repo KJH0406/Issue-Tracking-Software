@@ -4,11 +4,19 @@ import { zValidator } from "@hono/zod-validator"
 import { deleteCookie, setCookie } from "hono/cookie"
 
 import { createAdminClient } from "@/lib/appwrite"
+import { sessionMiddleware } from "@/lib/session-middleware"
 
 import { AUTH_COOKIE } from "../constants"
 import { loginSchema, registerSchema } from "../schema"
 
 const app = new Hono()
+  // 유저 정보 호출
+  .get("/current", sessionMiddleware, (c) => {
+    const user = c.get("user")
+
+    return c.json({ data: user })
+  })
+
   // 로그인 요청
   .post(
     "/login",
@@ -64,8 +72,11 @@ const app = new Hono()
   )
 
   // 로그아웃 요청
-  .post("/logout", (c) => {
+  .post("/logout", sessionMiddleware, async (c) => {
+    const account = c.get("account")
+
     deleteCookie(c, AUTH_COOKIE)
+    await account.deleteSession("current")
 
     return c.json({ success: true })
   })
