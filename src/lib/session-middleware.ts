@@ -15,7 +15,7 @@ import {
 import { getCookie } from "hono/cookie"
 import { createMiddleware } from "hono/factory"
 
-import { AUTH_COOKIE } from "@/app/features/auth/constants"
+import { AUTH_COOKIE } from "@/features/auth/constants"
 
 // 미들웨어에서 사용할 데이터 타입 명시
 type AdditionalContext = {
