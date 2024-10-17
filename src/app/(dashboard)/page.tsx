@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
 import { getCurrent } from "@/features/auth/actions"
-
+import { CreateWorkspaceForm } from "@/features/workspaces/components/create-workspace-form"
 export default async function Home() {
   const user = await getCurrent() // 현재 로그인한 사용자 정보 가져오기
 
@@ -10,8 +10,8 @@ export default async function Home() {
     redirect("/sign-in")
   }
   return (
-    <div>
-      홈페이지 입니다.
+    <div className="bg-neutral-500 p-4 h-full">
+      <CreateWorkspaceForm />
     </div>
   )
 }
