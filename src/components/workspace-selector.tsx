@@ -7,7 +7,7 @@ import { RiAddCircleFill } from "react-icons/ri"
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
 import { useGetWorkspaces } from "@/features/workspaces/api/use-get-workspaces"
 import { WorkspaceThumbnail } from "@/features/workspaces/components/workspace-thumbnail"
-
+import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace.modal"
 import {
   Select,
   SelectContent,
@@ -23,6 +23,9 @@ export const WorkspaceSelector = () => {
   // 워크스페이스 목록 가져오기
   const { data: workspaces } = useGetWorkspaces()
 
+  // 워크스페이스 생성 모달 오픈
+  const { open } = useCreateWorkspaceModal()
+
   // 워크스페이스 상세 페이지 리디렉션
   const onSelect = (id: string) => {
     // 워크스페이스 상세 페이지로 이동
@@ -33,7 +36,10 @@ export const WorkspaceSelector = () => {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase text-neutral-500">워크스페이스</p>
-        <RiAddCircleFill className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition" />
+        <RiAddCircleFill
+          onClick={open} // 워크스페이스 생성 모달 오픈
+          className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition"
+        />
       </div>
       <Select onValueChange={onSelect} value={workspaceId}>
         <SelectTrigger className="w-full bg-neutral-200 font-medium p-1">
