@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { ID } from "node-appwrite";
+import { ID, Query } from "node-appwrite";
 import { zValidator } from "@hono/zod-validator";
 
 import { sessionMiddleware } from "@/lib/session-middleware";
@@ -10,20 +10,32 @@ import { createWorkspaceSchema } from "../schemas";
 
 const app = new Hono()
 
-// 공간 생성 라우트
+// 워크스페이스 목록 가져오기
+.get("/", sessionMiddleware, async (c) => {
+  const databases = c.get("databases")
+
+  // 워크스페이스 가져오기
+  const workspaces = await databases.listDocuments(
+    DATABASE_ID,
+    WORKSPACE_ID
+  )
+
+  return c.json({data: workspaces})
+})
+
+// 워크스페이스 생성 하기
 .post(
     "/",
     zValidator("form", createWorkspaceSchema),
     // 세션 가져오기
     sessionMiddleware,
 
-    // 데이터베이스 가져오기
     async (c) => {
-      const databases = c.get("databases") 
-      const storage = c.get("storage")
-      const user = c.get("user")
+      const databases = c.get("databases") // 데이터베이스 가져오기
+      const storage = c.get("storage") // 스토리지 가져오기
+      const user = c.get("user") // 사용자 가져오기
       
-      const { name, image } = c.req.valid("form")
+      const { name, image } = c.req.valid("form") // 폼 데이터 가져오기
 
       // 업로드된 이미지의 URL을 저장할 변수 초기화
       let uploadedImageUrl: string | undefined 
