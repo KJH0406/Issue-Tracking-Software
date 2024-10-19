@@ -1,8 +1,13 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 import { RiAddCircleFill } from "react-icons/ri"
+
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
 import { useGetWorkspaces } from "@/features/workspaces/api/use-get-workspaces"
 import { WorkspaceThumbnail } from "@/features/workspaces/components/workspace-thumbnail"
+
 import {
   Select,
   SelectContent,
@@ -13,8 +18,16 @@ import {
 
 // 워크스페이스 셀렉터
 export const WorkspaceSelector = () => {
+  const router = useRouter()
+  const workspaceId = useWorkspaceId()
   // 워크스페이스 목록 가져오기
   const { data: workspaces } = useGetWorkspaces()
+
+  // 워크스페이스 상세 페이지 리디렉션
+  const onSelect = (id: string) => {
+    // 워크스페이스 상세 페이지로 이동
+    router.push(`/workspaces/${id}`)
+  }
 
   return (
     <div className="flex flex-col gap-2">
@@ -22,7 +35,7 @@ export const WorkspaceSelector = () => {
         <p className="text-xs uppercase text-neutral-500">워크스페이스</p>
         <RiAddCircleFill className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition" />
       </div>
-      <Select>
+      <Select onValueChange={onSelect} value={workspaceId}>
         <SelectTrigger className="w-full bg-neutral-200 font-medium p-1">
           <SelectValue placeholder="워크스페이스 선택" />
         </SelectTrigger>
