@@ -14,28 +14,28 @@ import { cn } from "@/lib/utils"
 const routes = [
   // 홈 라우트
   {
-    label: "Home",
+    label: "홈",
     href: "",
     icon: GoHome,
     activeIcon: GoHomeFill,
   },
   // 일감 라우트
   {
-    label: "My Tasks",
+    label: "내 페이지",
     href: "/tasks",
     icon: GoCheckCircle,
     activeIcon: GoCheckCircleFill,
   },
   // 설정 라우트
   {
-    label: "Settings",
+    label: "설정",
     href: "/settings",
     icon: SettingsIcon,
     activeIcon: SettingsIcon,
   },
   // 멤버 라우트
   {
-    label: "Members",
+    label: "사용자",
     href: "/members",
     icon: UsersIcon,
     activeIcon: UsersIcon,
@@ -44,7 +44,7 @@ const routes = [
 
 // 네비게이션 컴포넌트
 export const Navigation = () => {
-    return (
+  return (
     <div className="flex flex-col">
       {/* 네비게이션 라우트 */}
       {routes.map((item) => {
@@ -58,7 +58,7 @@ export const Navigation = () => {
             <div
               className={cn(
                 "flex items-center gap-2.5 p-2.5 rounded-md font-medium hover:text-primary transition text-neutral-500",
-                 isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
+                isActive && "bg-white shadow-sm hover:opacity-100 text-primary"
               )}
             >
               {/* 아이콘 표시 */}
