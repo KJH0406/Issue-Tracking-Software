@@ -16,9 +16,9 @@ export const useCreateWorkspace = () => {
 
   // 워크스페이스 생성 뮤테이션
   const mutation = useMutation<ResponseType, Error, RequestType>({
-    mutationFn: async ({ json }) => {
+    mutationFn: async ({ form }) => {
       // 워크스페이스 생성 API 호출
-      const response = await client.api.workspaces["$post"]({ json })
+      const response = await client.api.workspaces["$post"]({ form })
 
       if (!response.ok) {
         throw new Error("워크스페이스 생성에 실패했습니다.")

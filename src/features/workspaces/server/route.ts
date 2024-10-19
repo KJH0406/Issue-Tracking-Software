@@ -13,7 +13,7 @@ const app = new Hono()
 // 공간 생성 라우트
 .post(
     "/",
-    zValidator("json", createWorkspaceSchema),
+    zValidator("form", createWorkspaceSchema),
     // 세션 가져오기
     sessionMiddleware,
 
@@ -23,7 +23,7 @@ const app = new Hono()
       const storage = c.get("storage")
       const user = c.get("user")
       
-      const { name, image } = c.req.valid("json")
+      const { name, image } = c.req.valid("form")
 
       // 업로드된 이미지의 URL을 저장할 변수 초기화
       let uploadedImageUrl: string | undefined 
