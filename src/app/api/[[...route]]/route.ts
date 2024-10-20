@@ -9,13 +9,12 @@ import workspaces from "@/features/workspaces/server/route"
 const app = new Hono().basePath("/api")
 
 // 라우트 추가
-const routes = app
-.route("/auth", auth)
-.route("/workspaces", workspaces)
+const routes = app.route("/auth", auth).route("/workspaces", workspaces)
 
 // 라우트 내보내기
 export const GET = handle(app)
 export const POST = handle(app)
+export const PATCH = handle(app)
 
 // 라우트 타입 내보내기
 export type AppType = typeof routes

@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { useRef } from "react"
 import Image from "next/image"
-import { ImageIcon } from "lucide-react"
+import { ImageIcon, ArrowLeftIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -21,45 +21,53 @@ import {
   FormControl,
 } from "@/components/ui/form"
 
-import { createWorkspaceSchema } from "../schemas"
+import { Workspace } from "../types"
+import { updateWorkspaceSchema } from "../schemas"
+import { useUpdateWorkspace } from "../api/use-update-workspace"
 
-import { useCreateWorkspace } from "../api/use-create-workspace"
 import { cn } from "@/lib/utils"
 
-// 워크스페이스 생성 폼 컴포넌트 속성
-interface CreateWorkspaceFormProps {
+// 워크스페이스 업데이트 폼 컴포넌트 속성
+interface UpdateWorkspaceFormProps {
   onCancel?: () => void
+  initialValues: Workspace
 }
 
-// 워크스페이스 생성 폼 컴포넌트
-export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
+// 워크스페이스 업데이트 폼 컴포넌트
+export const UpdateWorkspaceForm = ({
+  initialValues,
+  onCancel,
+}: UpdateWorkspaceFormProps) => {
   const router = useRouter()
 
-  // 워크스페이스 생성 훅
-  const { mutate, isPending } = useCreateWorkspace()
+  // 워크스페이스 업데이트 훅
+  const { mutate, isPending } = useUpdateWorkspace()
 
   // 입력 요소에 대한 참조
   const inputRef = useRef<HTMLInputElement>(null)
 
   // 폼 생성
-  const form = useForm<z.infer<typeof createWorkspaceSchema>>({
-    resolver: zodResolver(createWorkspaceSchema),
+  const form = useForm<z.infer<typeof updateWorkspaceSchema>>({
+    resolver: zodResolver(updateWorkspaceSchema),
+    defaultValues: {
+      // 초기 값 설정
+      ...initialValues,
+      image: initialValues.imageUrl ?? "",
+    },
   })
 
   // 폼 제출
-  const onSubmit = (values: z.infer<typeof createWorkspaceSchema>) => {
+  const onSubmit = (values: z.infer<typeof updateWorkspaceSchema>) => {
     const finalValues = {
-      ...values, // 기존 값 유지
-      image: values.image instanceof File ? values.image : "", // 이미지가 파일 객체인 경우 폼에 추가
+      ...values,
+      image: values.image instanceof File ? values.image : "",
     }
     // 폼 제출
     mutate(
-      { form: finalValues },
+      { param: { workspaceId: initialValues.$id }, form: finalValues },
       {
-        // 성공 시 폼 초기화
-        onSuccess: ({ data }) => {
-          form.reset()
-          router.push(`/workspaces/${data.$id}`)
+        onSuccess: () => {
+          router.push(`/workspaces/${initialValues.$id}`)
         },
       }
     )
@@ -76,9 +84,22 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
 
   return (
     <Card className="w-full h-full border-none shadow-none">
-      <CardHeader className="flex p-7">
+      <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={
+            // 취소 함수가 있으면 취소 함수 호출
+            onCancel
+              ? onCancel
+              : () => router.push(`/workspaces/${initialValues.$id}`)
+          }
+        >
+          <ArrowLeftIcon className="size-4 mr-2" />
+          뒤로가기
+        </Button>
         <CardTitle className="text-xl font-bold">
-          새로운 워크 스페이스 생성하기
+          {initialValues.name}
         </CardTitle>
       </CardHeader>
       <div className="px-7">
@@ -192,7 +213,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                   취소
                 </Button>
                 <Button type="submit" size="lg" disabled={isPending}>
-                  생성
+                  저장
                 </Button>
               </div>
             </div>

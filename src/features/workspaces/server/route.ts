@@ -12,8 +12,9 @@ import {
   MEMBERS_ID,
 } from "@/config"
 
-import { createWorkspaceSchema } from "../schemas"
+import { createWorkspaceSchema, updateWorkspaceSchema } from "../schemas"
 import { MemberRole } from "@/features/members/types"
+import { getMember } from "@/features/members/utils"
 
 const app = new Hono()
 
@@ -110,6 +111,72 @@ const app = new Hono()
 
       // 워크스페이스 생성 성공
       return c.json({ data: workspace })
+    }
+  )
+
+  // 워크스페이스 업데이트
+  .patch(
+    "/:workspaceId",
+    zValidator("form", updateWorkspaceSchema), // 유효성 검사
+    sessionMiddleware,
+    async (c) => {
+      // appwrite db에서 정보 가져오기
+      const databases = c.get("databases") // 데이터베이스 가져오기
+      const storage = c.get("storage") // 스토리지 가져오기
+      const user = c.get("user") // 사용자 가져오기
+
+      // URL 파라미터에서 워크스페이스 ID 추출
+      const { workspaceId } = c.req.param()
+      // 유효성 검사를 통과한 폼 데이터 가져오기
+      const { name, image } = c.req.valid("form")
+
+      // 현재 사용자 멤버 가져오기(멤버가 없거나 관리자가 아니면 401 Unauthorized 오류를 반환)
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      })
+
+      // 멤버가 없거나 멤버의 권한이 관리자가 아니면 권한 없음 반환
+      if (!member || member.role !== MemberRole.ADMIN) {
+        return c.json({ error: "Unauthorized" }, 401)
+      }
+
+      // 업로드된 이미지의 URL을 저장할 변수 초기화
+      let uploadedImageUrl: string | undefined
+
+      // 이미지가 제공되었는지 확인
+      if (image instanceof File) {
+        // 스토리지에 이미지 파일 업로드
+        const file = await storage.createFile(
+          IMAGES_BUCKET_ID,
+          ID.unique(),
+          image
+        )
+
+        // 업로드된 이미지의 미리보기 가져오기
+        const arrayBuffer = await storage.getFilePreview(
+          IMAGES_BUCKET_ID,
+          file.$id
+        )
+
+        // ArrayBuffer를 Base64 문자열로 변환하여 데이터 URL 생성
+        uploadedImageUrl = `data:image/png;base64,${Buffer.from(
+          arrayBuffer
+        ).toString("base64")}`
+      } else {
+        uploadedImageUrl = image
+      }
+
+      // 수정된 정보로 워크스페이스 업데이트 실행
+      const updatedWorkspace = await databases.updateDocument(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId,
+        { name, imageUrl: uploadedImageUrl }
+      )
+
+      return c.json({ data: updatedWorkspace })
     }
   )
 
