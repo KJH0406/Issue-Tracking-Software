@@ -205,4 +205,36 @@ const app = new Hono()
     return c.json({ data: { $id: workspaceId } })
   })
 
+  // 워크스페이스 초대 코드 재설정
+  .post("/:workspaceId/reset-invite-code", sessionMiddleware, async (c) => {
+    const databases = c.get("databases") // 데이터베이스 가져오기
+    const user = c.get("user") // 사용자 가져오기
+
+    const { workspaceId } = c.req.param() // URL 파라미터에서 워크스페이스 ID 추출
+
+    // 현재 사용자 멤버 가져오기
+    const member = await getMember({
+      databases,
+      workspaceId,
+      userId: user.$id,
+    })
+
+    // 멤버가 없거나 멤버의 권한이 관리자가 아니면 권한 없음 반환
+    if (!member || member.role !== MemberRole.ADMIN) {
+      return c.json({ error: "Unauthorized" }, 401)
+    }
+
+    // 워크스페이스 초대 코드 재설정 실행
+    const workspace = await databases.updateDocument(
+      DATABASE_ID,
+      WORKSPACE_ID,
+      workspaceId,
+      {
+        inviteCode: generateInviteCode(6),
+      }
+    )
+
+    return c.json({ data: workspace })
+  })
+
 export default app
