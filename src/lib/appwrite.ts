@@ -37,8 +37,14 @@ export async function createAdminClient() {
     .setKey(process.env.NEXT_APPWRITE_KEY!)
 
   return {
+    // 계정 클라이언트
     get account() {
       return new Account(client)
+    },
+
+    // 사용자 클라이언트
+    get users() {
+      return new Users(client)
     },
   }
 }

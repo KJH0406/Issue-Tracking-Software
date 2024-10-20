@@ -12,8 +12,8 @@ interface GetMemberProps {
 // 멤버 가져오기
 export const getMember = async ({
   databases,
-  userId,
   workspaceId,
+  userId,
 }: GetMemberProps) => {
   // Appwrite 데이터베이스에서 문서 목록을 조회
   const member = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
