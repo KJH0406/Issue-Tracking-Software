@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { getCurrent } from "@/features/auth/queries"
 import { getWorkspace } from "@/features/workspaces/queries"
 
-import { UpdateWorkspaceForm } from "@/features/workspaces/components/update-workspace-form"
+import { EditWorkspaceForm } from "@/features/workspaces/components/edit-workspace-form"
 
 // 워크스페이스 설정 페이지 타입 정의
 interface WorkspaceIdSettingsPageProps {
@@ -35,7 +35,7 @@ const WorkspaceIdSettingsPage = async ({
   // 모든 조건을 통과하면 워크스페이스 업데이트 폼 렌더링
   return (
     <div className="w-full lg:max-w-xl">
-      <UpdateWorkspaceForm initialValues={initialValues} />
+      <EditWorkspaceForm initialValues={initialValues} />
     </div>
   )
 }

@@ -51,7 +51,7 @@ const app = new Hono()
     return c.json({ data: workspaces })
   })
 
-  // 워크스페이스 생성 하기
+  // 워크스페이스 생성
   .post(
     "/",
     zValidator("form", createWorkspaceSchema),
@@ -180,5 +180,29 @@ const app = new Hono()
     }
   )
 
-// 라우트 내보내기
+  // 워크스페이스 삭제
+  .delete("/:workspaceId", sessionMiddleware, async (c) => {
+    const databases = c.get("databases") // 데이터베이스 가져오기
+    const user = c.get("user") // 사용자 가져오기
+
+    const { workspaceId } = c.req.param() // URL 파라미터에서 워크스페이스 ID 추출
+
+    // 현재 사용자 멤버 가져오기
+    const member = await getMember({
+      databases,
+      workspaceId,
+      userId: user.$id,
+    })
+
+    // 멤버가 없거나 멤버의 권한이 관리자가 아니면 권한 없음 반환
+    if (!member || member.role !== MemberRole.ADMIN) {
+      return c.json({ error: "Unauthorized" }, 401)
+    }
+
+    // 워크스페이스 삭제 실행
+    await databases.deleteDocument(DATABASE_ID, WORKSPACE_ID, workspaceId)
+
+    return c.json({ data: { $id: workspaceId } })
+  })
+
 export default app
