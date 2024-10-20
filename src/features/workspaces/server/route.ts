@@ -1,3 +1,4 @@
+import { z } from "zod"
 import { Hono } from "hono"
 import { ID, Query } from "node-appwrite"
 import { zValidator } from "@hono/zod-validator"
@@ -15,6 +16,8 @@ import {
 import { createWorkspaceSchema, updateWorkspaceSchema } from "../schemas"
 import { MemberRole } from "@/features/members/types"
 import { getMember } from "@/features/members/utils"
+
+import { Workspace } from "../types"
 
 const app = new Hono()
 
@@ -117,7 +120,7 @@ const app = new Hono()
   // 워크스페이스 업데이트
   .patch(
     "/:workspaceId",
-    zValidator("form", updateWorkspaceSchema), // 유효성 검사
+    zValidator("form", updateWorkspaceSchema), // 유��성 검사
     sessionMiddleware,
     async (c) => {
       // appwrite db에서 정보 가져오기
@@ -236,5 +239,56 @@ const app = new Hono()
 
     return c.json({ data: workspace })
   })
+
+  // 워크스페이스 참여하기
+  .post(
+    "/:workspaceId/join",
+    sessionMiddleware,
+    zValidator("json", z.object({ code: z.string() })), // 요청 본문의 유효성을 검사하는 미들웨어
+    async (c) => {
+      // URL 파라미터에서 워크스페이스 ID 추출
+      const { workspaceId } = c.req.param()
+      // 요청 본문에서 초대 코드 추출
+      const { code } = c.req.valid("json")
+
+      // Hono 컨텍스트에서 데이터베이스와 사용자 정보 가져오기
+      const databases = c.get("databases")
+      const user = c.get("user")
+
+      // 현재 사용자가 이미 워크스페이스의 멤버인지 확인
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      })
+
+      // 이미 워크스페이스에 참여한 경우 오류 반환
+      if (member) {
+        return c.json({ error: "Already joined" }, 400)
+      }
+
+      // 초대 코드가 일치하는 워크스페이스 찾기
+      const workspace = await databases.getDocument<Workspace>(
+        DATABASE_ID,
+        WORKSPACE_ID,
+        workspaceId
+      )
+
+      // 초대 코드가 일치하지 않으면 오류 반환
+      if (workspace?.inviteCode !== code) {
+        return c.json({ error: "Invalid invite code" }, 400)
+      }
+
+      // 새 멤버로 사용자를 워크스페이스에 추가
+      await databases.createDocument(DATABASE_ID, MEMBERS_ID, ID.unique(), {
+        userId: user.$id,
+        workspaceId,
+        role: MemberRole.MEMBER,
+      })
+
+      // 성공적으로 참여한 워크스페이스 정보 반환
+      return c.json({ data: workspace })
+    }
+  )
 
 export default app

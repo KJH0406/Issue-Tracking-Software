@@ -117,7 +117,7 @@ export const EditWorkspaceForm = ({
   }
 
   // 워크스페이스 초대 링크
-  const fullInviteLink = `${window.location.origin}/workspaces/${initialValues.$id}/invite/${initialValues.inviteCode}`
+  const fullInviteLink = `${window.location.origin}/workspaces/${initialValues.$id}/join/${initialValues.inviteCode}`
 
   // 초대 링크 복사 함수
   const copyInviteLink = () => {

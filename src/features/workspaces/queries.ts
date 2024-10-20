@@ -70,3 +70,32 @@ export const getWorkspace = async ({ workspaceId }: GetWorkspaceProps) => {
     return null
   }
 }
+
+// 워크스페이스 정보 조회를 위한 속성
+interface GetWorkspaceInfoProps {
+  workspaceId: string
+}
+
+// 단일 워크스페이스 가져오기
+export const getWorkspaceInfo = async ({
+  workspaceId,
+}: GetWorkspaceInfoProps) => {
+  try {
+    const { databases } = await createSessionClient()
+
+    // 워크스페이스 정보 가져오기
+    const workspace = await databases.getDocument<Workspace>(
+      DATABASE_ID,
+      WORKSPACE_ID,
+      workspaceId
+    )
+
+    // 워크스페이스 정보 반환
+    return {
+      name: workspace.name,
+    }
+  } catch {
+    // 오류 발생 시 null 반환
+    return null
+  }
+}
