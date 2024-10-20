@@ -1,33 +1,19 @@
 "use server"
 
-import { Databases } from "node-appwrite"
-
 import { DATABASE_ID } from "@/config"
 import { MEMBERS_ID, WORKSPACE_ID } from "@/config"
 
-import { cookies } from "next/headers"
-import { Account, Client, Query } from "node-appwrite"
+import { Query } from "node-appwrite"
+import { createSessionClient } from "@/lib/appwrite"
 
 import { getMember } from "@/features/members/utils"
-import { AUTH_COOKIE } from "@/features/auth/constants"
 
 import { Workspace } from "./types"
 
 // 모든 워크스페이스 가져오기
 export const getWorkspaces = async () => {
   try {
-    // Appwrite 클라이언트 설정
-    const client = new Client()
-      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!)
-
-    const session = await cookies().get(AUTH_COOKIE)
-
-    if (!session) return { documents: [], total: 0 }
-
-    client.setSession(session.value)
-    const databases = new Databases(client)
-    const account = new Account(client)
+    const { account, databases } = await createSessionClient()
     const user = await account.get()
 
     const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
@@ -60,24 +46,7 @@ interface GetWorkspaceProps {
 // 단일 워크스페이스 가져오기
 export const getWorkspace = async ({ workspaceId }: GetWorkspaceProps) => {
   try {
-    // Appwrite 클라이언트 초기화 및 설정
-    const client = new Client()
-      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!)
-
-    // 쿠키에서 인증 세션 정보 가져오기
-    const session = await cookies().get(AUTH_COOKIE)
-
-    // 세션이 없으면 (로그인되지 않은 상태) null 반환
-    if (!session) return null
-
-    // 클라이언트에 세션 설정
-    client.setSession(session.value)
-
-    // Appwrite 서비스 인스턴스 생성
-    const databases = new Databases(client)
-    const account = new Account(client)
-
+    const { account, databases } = await createSessionClient()
     // 현재 로그인한 사용자 정보 가져오기
     const user = await account.get()
 
