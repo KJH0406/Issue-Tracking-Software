@@ -5,6 +5,8 @@ import { handle } from "hono/vercel"
 import auth from "@/features/auth/server/route"
 import workspaces from "@/features/workspaces/server/route"
 import members from "@/features/members/server/route"
+import projects from "@/features/projects/server/route"
+
 // 라우트 생성
 const app = new Hono().basePath("/api")
 
@@ -13,6 +15,7 @@ const routes = app
   .route("/auth", auth)
   .route("/members", members)
   .route("/workspaces", workspaces)
+  .route("/projects", projects)
 
 // 라우트 내보내기
 export const GET = handle(app)
