@@ -1,5 +1,6 @@
 import { CreateWorkspaceModal } from "@/features/workspaces/components/create-workspace-modal"
 import { CreateProjectModal } from "@/features/projects/components/create-project-modal"
+import { CreateTaskModal } from "@/features/tasks/components/create-task-modal"
 import Navbar from "@/components/navbar"
 import Sidebar from "@/components/sidebar"
 
@@ -12,6 +13,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="min-h-screen">
       <CreateWorkspaceModal />
       <CreateProjectModal />
+      <CreateTaskModal />
       <div className="flex w-full h-full">
         <div className="fixed top-0 left-0 hidden lg:block h-full lg:w-[264px] overflow-y-auto">
           {/* 화면 좌측에 고정된 Sidebar, 작은 화면에서는 숨김 */}

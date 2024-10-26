@@ -1,11 +1,15 @@
+"use client"
+
 // 외부 라이브러리 임포트
 import { DottedSeparator } from "@/components/dotted-separator"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlusIcon } from "lucide-react"
+import { useCreateTaskModal } from "../hooks/use-create-task.modal"
 
 // 일감 뷰 스위처 컴포넌트
 export const TaskViewSwitcher = () => {
+  const { open } = useCreateTaskModal()
   return (
     <Tabs className="flex-1 w-full border rounded-lg" defaultValue="list">
       <div className="h-full flex flex-col overflow-auto p-4">
@@ -21,7 +25,7 @@ export const TaskViewSwitcher = () => {
               캘린더
             </TabsTrigger>
           </TabsList>
-          <Button size="default" className="w-full lg:w-auto">
+          <Button size="default" className="w-full lg:w-auto" onClick={open}>
             <PlusIcon className="size-4 mr-2" />
             일감 생성
           </Button>
