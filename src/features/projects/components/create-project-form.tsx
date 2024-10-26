@@ -65,6 +65,8 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
         // 성공 시 폼 초기화
         onSuccess: ({ data }) => {
           form.reset()
+          // 프로젝트 생성 후 프로젝트 페이지로 이동
+          router.push(`/workspaces/${workspaceId}/projects/${data.$id}`)
         },
       }
     )

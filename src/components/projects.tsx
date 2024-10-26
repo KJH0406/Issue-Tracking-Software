@@ -20,8 +20,6 @@ export const Projects = () => {
   // 프로젝트 목록 가져오기
   const { data } = useGetProjects({ workspaceId })
 
-  const projectId = null
-
   const { open } = useCreateProjectModal()
 
   return (

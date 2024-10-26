@@ -12,30 +12,25 @@ import { Workspace } from "./types"
 
 // 모든 워크스페이스 가져오기
 export const getWorkspaces = async () => {
-  try {
-    const { account, databases } = await createSessionClient()
-    const user = await account.get()
+  const { account, databases } = await createSessionClient()
+  const user = await account.get()
 
-    const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
-      Query.equal("userId", user.$id),
-    ])
+  const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
+    Query.equal("userId", user.$id),
+  ])
 
-    if (members.total === 0) {
-      return { documents: [], total: 0 }
-    }
-
-    const workspaceIds = members.documents.map((member) => member.workspaceId)
-
-    const workspaces = await databases.listDocuments(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      [Query.orderDesc("$createdAt"), Query.contains("$id", workspaceIds)]
-    )
-
-    return workspaces
-  } catch {
+  if (members.total === 0) {
     return { documents: [], total: 0 }
   }
+
+  const workspaceIds = members.documents.map((member) => member.workspaceId)
+
+  const workspaces = await databases.listDocuments(DATABASE_ID, WORKSPACE_ID, [
+    Query.orderDesc("$createdAt"),
+    Query.contains("$id", workspaceIds),
+  ])
+
+  return workspaces
 }
 
 // 워크스페이스 조회를 위한 속성
@@ -45,30 +40,25 @@ interface GetWorkspaceProps {
 
 // 단일 워크스페이스 가져오기
 export const getWorkspace = async ({ workspaceId }: GetWorkspaceProps) => {
-  try {
-    const { account, databases } = await createSessionClient()
-    // 현재 로그인한 사용자 정보 가져오기
-    const user = await account.get()
+  const { account, databases } = await createSessionClient()
+  // 현재 로그인한 사용자 정보 가져오기
+  const user = await account.get()
 
-    // 현재 사용자가 요청한 워크스페이스의 멤버인지 확인
-    const member = await getMember({ databases, userId: user.$id, workspaceId })
+  // 현재 사용자가 요청한 워크스페이스의 멤버인지 확인
+  const member = await getMember({ databases, userId: user.$id, workspaceId })
 
-    // 멤버가 아니면 null 반환 (접근 권한 없음)
-    if (!member) return null
+  // 멤버가 아니면 오류 발생 (접근 권한 없음)
+  if (!member) throw new Error("Unauthorized")
 
-    // 워크스페이스 정보 가져오기
-    const workspace = await databases.getDocument<Workspace>(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      workspaceId
-    )
+  // 워크스페이스 정보 가져오기
+  const workspace = await databases.getDocument<Workspace>(
+    DATABASE_ID,
+    WORKSPACE_ID,
+    workspaceId
+  )
 
-    // 워크스페이스 정보 반환
-    return workspace
-  } catch {
-    // 오류 발생 시 null 반환
-    return null
-  }
+  // 워크스페이스 정보 반환
+  return workspace
 }
 
 // 워크스페이스 정보 조회를 위한 속성
@@ -80,22 +70,17 @@ interface GetWorkspaceInfoProps {
 export const getWorkspaceInfo = async ({
   workspaceId,
 }: GetWorkspaceInfoProps) => {
-  try {
-    const { databases } = await createSessionClient()
+  const { databases } = await createSessionClient()
 
-    // 워크스페이스 정보 가져오기
-    const workspace = await databases.getDocument<Workspace>(
-      DATABASE_ID,
-      WORKSPACE_ID,
-      workspaceId
-    )
+  // 워크스페이스 정보 가져오기
+  const workspace = await databases.getDocument<Workspace>(
+    DATABASE_ID,
+    WORKSPACE_ID,
+    workspaceId
+  )
 
-    // 워크스페이스 정보 반환
-    return {
-      name: workspace.name,
-    }
-  } catch {
-    // 오류 발생 시 null 반환
-    return null
+  // 워크스페이스 정보 반환
+  return {
+    name: workspace.name,
   }
 }

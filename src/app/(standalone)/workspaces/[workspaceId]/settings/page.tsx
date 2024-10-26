@@ -22,11 +22,6 @@ const WorkspaceIdSettingsPage = async ({
   // URL에서 추출한 워크스페이스 ID를 사용하여 해당 워크스페이스 정보 가져오기
   const initialValues = await getWorkspace({ workspaceId: params.workspaceId })
 
-  // 워크스페이스 정보가 없으면 해당 워크스페이스의 메인 페이지로 리다이렉트
-  if (!initialValues) {
-    redirect(`/workspaces/${params.workspaceId}`)
-  }
-
   // 사용자 정보가 없으면 (로그인하지 않은 경우) 로그인 페이지로 리다이렉트
   if (!user) {
     redirect("/sign-in")

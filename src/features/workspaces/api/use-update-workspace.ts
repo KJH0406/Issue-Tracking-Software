@@ -4,7 +4,7 @@ import { InferRequestType, InferResponseType } from "hono"
 import { toast } from "sonner"
 
 import { client } from "@/lib/rpc"
-
+import { useRouter } from "next/navigation"
 // API의 응답과 요청 타입을 추론
 type ResponseType = InferResponseType<
   (typeof client.api.workspaces)[":workspaceId"]["$patch"],
@@ -16,6 +16,7 @@ type RequestType = InferRequestType<
 
 // 워크스페이스 업데이트 훅
 export const useUpdateWorkspace = () => {
+  const router = useRouter()
   // 쿼리 클라이언트 가져오기
   const queryClient = useQueryClient()
 
@@ -37,6 +38,7 @@ export const useUpdateWorkspace = () => {
     onSuccess: ({ data }) => {
       // 워크스페이스 업데이트 성공
       toast.success("워크스페이스가 업데이트되었습니다.")
+      router.refresh()
       // 워크스페이스 목록 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
       // 워크스페이스 쿼리 무효화

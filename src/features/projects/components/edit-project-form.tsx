@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { useRef } from "react"
 import Image from "next/image"
-import { ImageIcon, ArrowLeftIcon, CopyIcon } from "lucide-react"
+import { ImageIcon, ArrowLeftIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -24,43 +24,36 @@ import {
   FormControl,
 } from "@/components/ui/form"
 
-import { Workspace } from "../types"
-import { updateWorkspaceSchema } from "../schemas"
-import { useUpdateWorkspace } from "../api/use-update-workspace"
-import { useDeleteWorkspace } from "../api/use-delete-workspace"
-import { useResetInviteCode } from "../api/use-reset-invite-code"
-import { toast } from "sonner"
+import { Project } from "../types"
+import { updateProjectSchema } from "../schemas"
+import { useUpdateProject } from "../api/use-update-project"
+import { useDeleteProject } from "../api/use-delete-project"
 
-// 워크스페이스 업데이트 폼 컴포넌트 속성
-interface EditWorkspaceFormProps {
+// 프로젝트 업데이트 폼 컴포넌트 속성
+interface EditProjectFormProps {
   onCancel?: () => void
-  initialValues: Workspace
+  initialValues: Project
 }
 
-// 워크스페이스 업데이트 폼 컴포넌트
-export const EditWorkspaceForm = ({
+// 프로젝트 업데이트 폼 컴포넌트
+export const EditProjectForm = ({
   initialValues,
   onCancel,
-}: EditWorkspaceFormProps) => {
+}: EditProjectFormProps) => {
   const router = useRouter()
 
-  // 워크스페이스 업데이트 훅
-  const { mutate, isPending } = useUpdateWorkspace()
+  // 프로젝트 업데이트 훅
+  const { mutate, isPending } = useUpdateProject()
 
-  // 워크스페이스 삭제 훅
-  const { mutate: deleteWorkspace, isPending: isDeleting } =
-    useDeleteWorkspace()
-
-  // 워크스페이스 초대 코드 재설정 훅
-  const { mutate: resetInviteCode, isPending: isResettingInviteCode } =
-    useResetInviteCode()
+  // 프로젝트 삭제 훅
+  const { mutate: deleteProject, isPending: isDeleting } = useDeleteProject()
 
   // 입력 요소에 대한 참조
   const inputRef = useRef<HTMLInputElement>(null)
 
   // 폼 생성
-  const form = useForm<z.infer<typeof updateWorkspaceSchema>>({
-    resolver: zodResolver(updateWorkspaceSchema),
+  const form = useForm<z.infer<typeof updateProjectSchema>>({
+    resolver: zodResolver(updateProjectSchema),
     defaultValues: {
       // 초기 값 설정
       ...initialValues,
@@ -69,14 +62,14 @@ export const EditWorkspaceForm = ({
   })
 
   // 폼 제출
-  const onSubmit = (values: z.infer<typeof updateWorkspaceSchema>) => {
+  const onSubmit = (values: z.infer<typeof updateProjectSchema>) => {
     const finalValues = {
       ...values,
       image: values.image instanceof File ? values.image : "",
     }
     // 폼 제출
     mutate(
-      { param: { workspaceId: initialValues.$id }, form: finalValues },
+      { param: { projectId: initialValues.$id }, form: finalValues },
       {
         onSuccess: () => {
           form.reset()
@@ -95,69 +88,42 @@ export const EditWorkspaceForm = ({
   }
 
   const [DeleteDialog, confirmDelete] = useConfirm(
-    "⚠️ 워크스페이스 삭제",
-    "워크스페이스를 삭제하면 워크스페이스에 속한 모든 데이터가 삭제되며 복구할 수 없습니다.",
+    "⚠️ 프로젝트 삭제",
+    "프로젝트를 삭제하면 프로젝트에 속한 모든 데이터가 삭제되며 복구할 수 없습니다.",
     "destructive"
   )
 
-  // 워크스페이스 삭제
+  // 프로젝트 삭제
   const handleDelete = async () => {
     const result = await confirmDelete()
     if (!result) return
 
-    // 워크스페이스 삭제 뮤테이션 실행
-    deleteWorkspace(
-      { param: { workspaceId: initialValues.$id } },
+    // 프로젝트 삭제 뮤테이션 실행
+    deleteProject(
+      { param: { projectId: initialValues.$id } },
       {
         onSuccess: () => {
-          window.location.href = "/"
+          window.location.href = `/workspaces/${initialValues.workspaceId}`
         },
       }
     )
   }
 
-  // 워크스페이스 초대 링크
-  const fullInviteLink = `${window.location.origin}/workspaces/${initialValues.$id}/join/${initialValues.inviteCode}`
-
-  // 초대 링크 복사 함수
-  const copyInviteLink = () => {
-    navigator.clipboard.writeText(fullInviteLink).then(() => {
-      toast.success("워크스페이스 초대 링크가 복사되었습니다.")
-    })
-  }
-
-  // 워크스페이스 초대 코드 재설정 다이얼로그 매개변수
-  const [ResetInviteDialog, confirmResetInvite] = useConfirm(
-    "⚠️ 워크스페이스 초대 코드 재설정",
-    "워크스페이스 초대 코드를 재설정하면 기존 초대 코드는 더 이상 사용할 수 없습니다.",
-    "destructive"
-  )
-
-  // 워크스페이스 초대 코드 재설정
-  const handleResetInviteCode = async () => {
-    const result = await confirmResetInvite()
-    if (!result) return
-
-    // 워크스페이스 초대 코드 재설정 뮤테이션 실행
-    resetInviteCode({ param: { workspaceId: initialValues.$id } })
-  }
-
   return (
     <div className="flex flex-col gap-y-4">
-      {/* 워크스페이스 삭제 */}
       <DeleteDialog />
-      {/* 워크스페이스 초대 코드 재설정 */}
-      <ResetInviteDialog />
       <Card className="w-full h-full border-none shadow-none">
         <CardHeader className="flex flex-row items-center gap-x-4 p-7 space-y-0">
           <Button
             variant="secondary"
             size="sm"
             onClick={
-              // 취소 함수가 있으면 취소 함수 호출
               onCancel
                 ? onCancel
-                : () => router.push(`/workspaces/${initialValues.$id}`)
+                : () =>
+                    router.push(
+                      `/workspaces/${initialValues.workspaceId}/projects/${initialValues.$id}`
+                    )
             }
           >
             <ArrowLeftIcon className="size-4 mr-2" />
@@ -179,11 +145,11 @@ export const EditWorkspaceForm = ({
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>워크스페이스 이름</FormLabel>
+                      <FormLabel>프로젝트 이름</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder="워크스페이스 이름을 입력해주세요."
+                          placeholder="프로젝트 이름을 입력해주세요."
                         />
                       </FormControl>
                     </FormItem>
@@ -216,9 +182,7 @@ export const EditWorkspaceForm = ({
                           </Avatar>
                         )}
                         <div className="flex flex-col">
-                          <p className="text-sm font-medium">
-                            워크스페이스 아이콘
-                          </p>
+                          <p className="text-sm font-medium">프로젝트 아이콘</p>
                           <p className="text-sm text-muted-foreground">
                             JPG, PNG, SVG, JPEG 파일만 최대 1MB까지 업로드 할 수
                             있습니다.
@@ -289,44 +253,10 @@ export const EditWorkspaceForm = ({
       <Card className="w-full h-full border-none shadow-none">
         <CardContent className="p-7">
           <div className="flex flex-col">
-            <h3 className="font-bold">📩 워크스페이스 사용자 초대</h3>
+            <h3 className="font-bold">⚠️ 프로젝트 삭제</h3>
             <p className="text-sm text-muted-foreground">
-              워크스페이스 초대코드를 통해 워크스페이스에 사용자를 초대할 수
-              있습니다.
-            </p>
-            <div className="mt-4">
-              <div className="flex items-center gap-x-2">
-                <Input value={fullInviteLink} />
-                <Button
-                  className="size-12"
-                  variant="secondary"
-                  onClick={copyInviteLink}
-                >
-                  <CopyIcon className="size-5" />
-                </Button>
-              </div>
-            </div>
-            <DottedSeparator className="py-7" />
-            <Button
-              className="mt-6 w-fit ml-auto"
-              size="sm"
-              variant="destructive"
-              type="button"
-              disabled={isPending || isResettingInviteCode}
-              onClick={handleResetInviteCode}
-            >
-              워크스페이스 초대코드 재설정
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="w-full h-full border-none shadow-none">
-        <CardContent className="p-7">
-          <div className="flex flex-col">
-            <h3 className="font-bold">⚠️ 워크스페이스 삭제</h3>
-            <p className="text-sm text-muted-foreground">
-              워크스페이스를 삭제하면 워크스페이스에 속한 모든 데이터가 삭제되며
-              복구할 수 없습니다.
+              프로젝트를 삭제하면 프로젝트에 속한 모든 데이터가 삭제되며 복구할
+              수 없습니다.
             </p>
             <DottedSeparator className="py-7" />
             <Button
@@ -337,7 +267,7 @@ export const EditWorkspaceForm = ({
               disabled={isPending || isDeleting}
               onClick={handleDelete}
             >
-              워크스페이스 삭제
+              프로젝트 삭제
             </Button>
           </div>
         </CardContent>
