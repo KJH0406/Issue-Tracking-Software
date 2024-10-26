@@ -7,10 +7,12 @@ import { ImageIcon } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { createProjectSchema } from "../schemas"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DottedSeparator } from "@/components/dotted-separator"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import {
@@ -22,35 +24,38 @@ import {
 } from "@/components/ui/form"
 import { DialogTitle } from "@/components/ui/dialog"
 
-import { createWorkspaceSchema } from "../schemas"
+import { useCreateProject } from "../api/use-create-project"
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
 
-import { useCreateWorkspace } from "../api/use-create-workspace"
-import { cn } from "@/lib/utils"
-
-// 워크스페이스 생성 폼 컴포넌트 속성
-interface CreateWorkspaceFormProps {
+// 프로젝트 생성 폼 컴포넌트 속성
+interface CreateProjectFormProps {
   onCancel?: () => void
 }
 
-// 워크스페이스 생성 폼 컴포넌트
-export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
+// 프로젝트 생성 폼 컴포넌트
+export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
+  const workspaceId = useWorkspaceId()
   const router = useRouter()
 
-  // 워크스페이스 생성 훅
-  const { mutate, isPending } = useCreateWorkspace()
+  // 프로젝트 생성 훅
+  const { mutate, isPending } = useCreateProject()
 
   // 입력 요소에 대한 참조
   const inputRef = useRef<HTMLInputElement>(null)
 
   // 폼 생성
-  const form = useForm<z.infer<typeof createWorkspaceSchema>>({
-    resolver: zodResolver(createWorkspaceSchema),
+  const form = useForm<z.infer<typeof createProjectSchema>>({
+    resolver: zodResolver(createProjectSchema.omit({ workspaceId: true })),
+    defaultValues: {
+      name: "",
+    },
   })
 
   // 폼 제출
-  const onSubmit = (values: z.infer<typeof createWorkspaceSchema>) => {
+  const onSubmit = (values: z.infer<typeof createProjectSchema>) => {
     const finalValues = {
       ...values, // 기존 값 유지
+      workspaceId, // 워크스페이스 ID
       image: values.image instanceof File ? values.image : "", // 이미지가 파일 객체인 경우 폼에 추가
     }
     // 폼 제출
@@ -60,7 +65,6 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
         // 성공 시 폼 초기화
         onSuccess: ({ data }) => {
           form.reset()
-          router.push(`/workspaces/${data.$id}`)
         },
       }
     )
@@ -80,7 +84,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
       <CardHeader className="flex p-7">
         <DialogTitle asChild>
           <CardTitle className="text-xl font-bold">
-            새로운 워크 스페이스 생성하기
+            새로운 프로젝트 생성하기
           </CardTitle>
         </DialogTitle>
       </CardHeader>
@@ -96,11 +100,11 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>워크스페이스 이름</FormLabel>
+                    <FormLabel>프로젝트 이름</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        placeholder="워크스페이스 이름을 입력해주세요."
+                        placeholder="프로젝트 이름을 입력해주세요."
                       />
                     </FormControl>
                   </FormItem>
@@ -133,9 +137,7 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
                         </Avatar>
                       )}
                       <div className="flex flex-col">
-                        <p className="text-sm font-medium">
-                          워크스페이스 아이콘
-                        </p>
+                        <p className="text-sm font-medium">프로젝트 아이콘</p>
                         <p className="text-sm text-muted-foreground">
                           JPG, PNG, SVG, JPEG 파일만 최대 1MB까지 업로드 할 수
                           있습니다.
