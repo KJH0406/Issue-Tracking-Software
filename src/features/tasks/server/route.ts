@@ -15,7 +15,6 @@ import { PROJECTS_ID, MEMBERS_ID } from "@/config"
 import { Project } from "@/features/projects/types"
 
 const app = new Hono()
-
   // 일감 조회
   .get(
     "/",
@@ -205,5 +204,137 @@ const app = new Hono()
       return c.json({ data: task })
     }
   )
+
+  // 일감 삭제
+  .delete("/:taskId", sessionMiddleware, async (c) => {
+    const user = c.get("user")
+    const databases = c.get("databases")
+    // 일감 ID 추출
+    const { taskId } = c.req.param()
+
+    // 일감 조회
+    const task = await databases.getDocument<Task>(
+      DATABASE_ID,
+      TASKS_ID,
+      taskId
+    )
+
+    // 현재 사용자가 일감의 워크스페이스에 속한 멤버인지 확인
+    const member = await getMember({
+      databases,
+      workspaceId: task.workspaceId,
+      userId: user.$id,
+    })
+
+    // 멤버가 아닌 경우 403 에러 반환
+    if (!member) {
+      return c.json({ error: "워크스페이스에 속한 멤버가 아닙니다." }, 401)
+    }
+
+    // 일감 삭제
+    await databases.deleteDocument(DATABASE_ID, TASKS_ID, taskId)
+
+    return c.json({ data: { $id: task.$id } })
+  })
+
+  // 일감 업데이트
+  .patch(
+    "/:taskId",
+    sessionMiddleware,
+    zValidator("json", createTaskSchema.partial()), // 부분 업데이트 허용
+    async (c) => {
+      // 사용자 정보 가져오기
+      const user = c.get("user")
+      // 데이터베이스 가져오기
+      const databases = c.get("databases")
+
+      // 일감 데이터 추출
+      const { name, status, projectId, dueDate, assigneeId, description } =
+        c.req.valid("json")
+
+      // 일감 ID 추출
+      const { taskId } = c.req.param()
+
+      // 기존 일감 조회
+      const existingTask = await databases.getDocument<Task>(
+        DATABASE_ID,
+        TASKS_ID,
+        taskId
+      )
+
+      // 현재 사용자가 지정된 워크스페이스의 멤버인지 확인
+      const member = await getMember({
+        databases,
+        workspaceId: existingTask.workspaceId,
+        userId: user.$id,
+      })
+
+      // 멤버가 아닌 경우 401 Unauthorized 에러 반환
+      if (!member) {
+        return c.json({ error: "워크스페이스에 속한 멤버가 아닙니다." }, 401)
+      }
+
+      // 일감 업데이트
+      const task = await databases.updateDocument(
+        DATABASE_ID,
+        TASKS_ID,
+        taskId,
+        {
+          name,
+          status,
+          projectId,
+          assigneeId,
+          dueDate,
+          description,
+        }
+      )
+
+      return c.json({ data: task })
+    }
+  )
+
+  // 일감 상세 조회
+  .get("/:taskId", sessionMiddleware, async (c) => {
+    const currentUser = c.get("user")
+    const databases = c.get("databases")
+    const { users } = await createAdminClient()
+    const { taskId } = c.req.param()
+
+    // 일감 조회
+    const task = await databases.getDocument<Task>(
+      DATABASE_ID,
+      TASKS_ID,
+      taskId
+    )
+
+    // 현재 사용자가 일감의 워크스페이스에 속한 멤버인지 확인
+    const currentMember = await getMember({
+      databases,
+      workspaceId: task.workspaceId,
+      userId: currentUser.$id,
+    })
+
+    if (!currentMember) {
+      return c.json({ error: "워크스페이스에 속한 멤버가 아닙니다." }, 401)
+    }
+
+    const project = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      task.projectId
+    )
+
+    const member = await databases.getDocument(
+      DATABASE_ID,
+      MEMBERS_ID,
+      task.assigneeId
+    )
+
+    const user = await users.get(member.userId)
+
+    const assignee = { ...member, name: user.name, email: user.email }
+
+    return c.json({ data: { ...task, project, assignee } })
+  })
 
 export default app

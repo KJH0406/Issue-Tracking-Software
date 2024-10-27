@@ -32,7 +32,6 @@ export const useCreateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
     },
     onError: (error) => {
-      console.error(error)
       // 일감 생성 실패
       toast.error("일감 생성에 실패했습니다.")
     },

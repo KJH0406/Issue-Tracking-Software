@@ -22,7 +22,6 @@ import {
   FormLabel,
   FormControl,
 } from "@/components/ui/form"
-import { DialogTitle } from "@/components/ui/dialog"
 
 import { useCreateProject } from "../api/use-create-project"
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
@@ -84,11 +83,9 @@ export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   return (
     <Card className="w-full h-full border-none shadow-none">
       <CardHeader className="flex p-7">
-        <DialogTitle asChild>
-          <CardTitle className="text-xl font-bold">
-            새로운 프로젝트 생성하기
-          </CardTitle>
-        </DialogTitle>
+        <CardTitle className="text-xl font-bold">
+          새로운 프로젝트 생성하기
+        </CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />

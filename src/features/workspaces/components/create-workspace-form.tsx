@@ -20,7 +20,6 @@ import {
   FormLabel,
   FormControl,
 } from "@/components/ui/form"
-import { DialogTitle } from "@/components/ui/dialog"
 
 import { createWorkspaceSchema } from "../schemas"
 
@@ -78,11 +77,9 @@ export const CreateWorkspaceForm = ({ onCancel }: CreateWorkspaceFormProps) => {
   return (
     <Card className="w-full h-full border-none shadow-none">
       <CardHeader className="flex p-7">
-        <DialogTitle asChild>
-          <CardTitle className="text-xl font-bold">
-            새로운 워크 스페이스 생성하기
-          </CardTitle>
-        </DialogTitle>
+        <CardTitle className="text-xl font-bold">
+          새로운 워크 스페이스 생성하기
+        </CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />

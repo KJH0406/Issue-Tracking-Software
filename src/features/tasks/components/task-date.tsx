@@ -16,7 +16,9 @@ export const TaskDate = ({ value, className }: TaskDateProps) => {
   // 마감일 색상 설정
   let textColor = "text-muted-foreground"
   // 마감일 기한 별 색상 코드
-  if (diffInDays <= 3) {
+  if (diffInDays <= 0) {
+    textColor = "text-muted-foreground"
+  } else if (diffInDays <= 3) {
     textColor = "text-red-500"
   } else if (diffInDays <= 7) {
     textColor = "text-yellow-500"

@@ -32,43 +32,53 @@ import { DatePicker } from "@/components/date-picker"
 import { MemberThumbnail } from "@/features/members/components/member-thumbnail"
 
 // 기능 관련 임포트
-import { useCreateTask } from "../api/use-create-task"
 import { createTaskSchema } from "../schemas"
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
-import { TaskStatus } from "../types"
+import { Task, TaskStatus } from "../types"
 import { ProjectThumbnail } from "@/features/projects/components/project-thumbnail"
+import { useUpdateTask } from "../api/use-update-task"
 
-// 일감 생성 폼 컴포넌트 속성
-interface CreateTaskFormProps {
+// 일감 수정 폼 컴포넌트 속성
+interface EditTaskFormProps {
   onCancel?: () => void
   projectOptions: { id: string; name: string; imageUrl: string }[]
   memberOptions: { id: string; name: string }[]
+  initialValues: Task
 }
 
-// 일감 생성 폼 컴포넌트
-export const CreateTaskForm = ({
+// 일감 수정 폼 컴포넌트
+export const EditTaskForm = ({
   onCancel,
   projectOptions,
   memberOptions,
-}: CreateTaskFormProps) => {
+  initialValues,
+}: EditTaskFormProps) => {
   const workspaceId = useWorkspaceId()
   const router = useRouter()
 
-  // 일감 생성 훅
-  const { mutate, isPending } = useCreateTask()
+  // 일감 수정 훅
+  const { mutate, isPending } = useUpdateTask()
 
   // 폼 생성
   const form = useForm<z.infer<typeof createTaskSchema>>({
-    resolver: zodResolver(createTaskSchema.omit({ workspaceId: true })),
+    resolver: zodResolver(
+      createTaskSchema.omit({ workspaceId: true, description: true })
+    ),
     defaultValues: {
-      workspaceId,
+      ...initialValues,
+      dueDate: initialValues.dueDate
+        ? new Date(initialValues.dueDate)
+        : undefined,
     },
   })
 
   // 폼 제출
   const onSubmit = (values: z.infer<typeof createTaskSchema>) => {
     mutate(
-      { json: { ...values, workspaceId } },
+      {
+        json: { ...values, workspaceId },
+        param: { taskId: initialValues.$id },
+      },
       {
         // 성공 시 폼 초기화
         onSuccess: () => {
@@ -82,9 +92,7 @@ export const CreateTaskForm = ({
   return (
     <Card className="w-full h-full border-none shadow-none">
       <CardHeader className="flex p-7">
-        <CardTitle className="text-xl font-bold">
-          새로운 일감 생성하기
-        </CardTitle>
+        <CardTitle className="text-xl font-bold">일감 수정하기</CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />
@@ -240,7 +248,7 @@ export const CreateTaskForm = ({
                   취소
                 </Button>
                 <Button type="submit" size="lg" disabled={isPending}>
-                  생성
+                  저장
                 </Button>
               </div>
             </div>
