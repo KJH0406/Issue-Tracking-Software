@@ -9,7 +9,7 @@ import { sessionMiddleware } from "@/lib/session-middleware"
 import { createTaskSchema } from "../schemas"
 import { getMember } from "@/features/members/utils"
 import { DATABASE_ID, TASKS_ID } from "@/config"
-import { TaskStatus } from "../types"
+import { Task, TaskStatus } from "../types"
 import { createAdminClient } from "@/lib/appwrite"
 import { PROJECTS_ID, MEMBERS_ID } from "@/config"
 import { Project } from "@/features/projects/types"
@@ -87,7 +87,11 @@ const app = new Hono()
       }
 
       // 데이터베이스에서 일감 목록 조회
-      const tasks = await databases.listDocuments(DATABASE_ID, TASKS_ID, query)
+      const tasks = await databases.listDocuments<Task>(
+        DATABASE_ID,
+        TASKS_ID,
+        query
+      )
 
       // 일감에 연관된 프로젝트 ID와 담당자 ID 추출
       const projectIds = tasks.documents.map((task) => task.projectId)
