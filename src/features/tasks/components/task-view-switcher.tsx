@@ -1,25 +1,28 @@
 "use client"
 
-// 아이콘 임포트
+// React 및 외부 라이브러리
+import { useCallback } from "react"
+import { useQueryState } from "nuqs"
 import { Loader, PlusIcon } from "lucide-react"
 
-// 외부 라이브러리 임포트
-import { useQueryState } from "nuqs"
-
-// 커스텀 훅 임포트
+// 일감 로직 관련 훅
 import { useCreateTaskModal } from "../hooks/use-create-task.modal"
 import { useGetTasks } from "../api/use-get-tasks"
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
+import { useTaskFilters } from "../hooks/use-task-filters"
 
-// UI 컴포넌트 임포트
-import { DottedSeparator } from "@/components/dotted-separator"
+// UI 컴포넌트
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DottedSeparator } from "@/components/dotted-separator"
 import { DataFilters } from "./data-filters"
-import { useTaskFilters } from "../hooks/use-task-filters"
 import { DataTable } from "./data-table"
-import { columns } from "./columns"
 import { DataKanban } from "./data-kanban"
+import { columns } from "./columns"
+
+// 타입
+import { TaskStatus } from "../types"
+import { useBulkUpdateTask } from "../api/use-bulk-update-task"
 
 // 일감 뷰 스위처 컴포넌트
 export const TaskViewSwitcher = () => {
@@ -27,6 +30,9 @@ export const TaskViewSwitcher = () => {
 
   // 일감 필터 상태 관리
   const [{ status, projectId, assigneeId, dueDate }] = useTaskFilters()
+
+  // 일감 대량 업데이트 뮤테이션
+  const { mutate: bulkUpdate } = useBulkUpdateTask()
 
   // 일감 뷰 상태 관리
   const [view, setView] = useQueryState("task-view", {
@@ -44,6 +50,14 @@ export const TaskViewSwitcher = () => {
     status,
     dueDate,
   })
+
+  // 칸반 카드 상태 변경 핸들러
+  const onKanbanChange = useCallback(
+    (tasks: { $id: string; status: TaskStatus; position: number }[]) => {
+      bulkUpdate({ json: { tasks } })
+    },
+    [bulkUpdate]
+  )
 
   return (
     <Tabs
@@ -82,7 +96,10 @@ export const TaskViewSwitcher = () => {
               <DataTable columns={columns} data={tasks?.documents ?? []} />
             </TabsContent>
             <TabsContent value="kanban" className="mt-0">
-              <DataKanban data={tasks?.documents ?? []} />
+              <DataKanban
+                data={tasks?.documents ?? []}
+                onChange={onKanbanChange}
+              />
             </TabsContent>
             <TabsContent value="calendar" className="mt-0">
               {JSON.stringify(tasks)}

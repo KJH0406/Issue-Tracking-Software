@@ -337,4 +337,80 @@ const app = new Hono()
     return c.json({ data: { ...task, project, assignee } })
   })
 
+  // 일감 대량 업데이트
+  .post(
+    "/bulk-update",
+    sessionMiddleware,
+    // 요청 데이터 유효성 검사
+    zValidator(
+      "json",
+      z.object({
+        tasks: z.array(
+          z.object({
+            $id: z.string(), // 일감 ID
+            status: z.nativeEnum(TaskStatus), // 변경할 상태
+            position: z.number().int().min(1000).max(1_000_000), // 변경할 위치
+          })
+        ),
+      })
+    ),
+    async (c) => {
+      const databases = c.get("databases")
+      const user = c.get("user")
+      const { tasks } = await c.req.valid("json")
+
+      // 업데이트할 일감들을 데이터베이스에서 조회
+      const taskToUpdates = await databases.listDocuments<Task>(
+        DATABASE_ID,
+        TASKS_ID,
+        [
+          Query.contains(
+            "$id",
+            tasks.map((task) => task.$id) // 요청된 모든 일감 ID로 조회
+          ),
+        ]
+      )
+
+      // 모든 일감이 같은 워크스페이스에 속하는지 확인
+      const workspaceIds = new Set(
+        taskToUpdates.documents.map((task) => task.workspaceId)
+      )
+      // Set의 크기가 1보다 크면 서로 다른 워크스페이스의 일감이 포함된 것
+      if (workspaceIds.size !== 1) {
+        return c.json(
+          { error: "모든 일감이 동일한 워크스페이스에 속해야 합니다." },
+          400
+        )
+      }
+
+      // 워크스페이스 ID 추출 (Set에서 첫 번째 값)
+      const workspaceId = workspaceIds.values().next().value
+
+      // 현재 사용자가 해당 워크스페이스의 멤버인지 확인
+      const member = await getMember({
+        databases,
+        workspaceId,
+        userId: user.$id,
+      })
+
+      if (!member) {
+        return c.json({ error: "워크스페이스에 속한 멤버가 아닙니다." }, 401)
+      }
+
+      // 모든 일감 동시 업데이트 (Promise.all 사용)
+      const updatedTasks = await Promise.all(
+        tasks.map((task) => {
+          const { $id, status, position } = task
+          return databases.updateDocument<Task>(DATABASE_ID, TASKS_ID, $id, {
+            status,
+            position,
+          })
+        })
+      )
+
+      // 업데이트된 일감들 반환
+      return c.json({ data: updatedTasks })
+    }
+  )
+
 export default app
