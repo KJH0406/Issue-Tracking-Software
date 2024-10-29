@@ -18,6 +18,7 @@ import { DottedSeparator } from "@/components/dotted-separator"
 import { DataFilters } from "./data-filters"
 import { DataTable } from "./data-table"
 import { DataKanban } from "./data-kanban"
+import { DataCalendar } from "./data-calendar"
 import { columns } from "./columns"
 
 // 타입
@@ -101,8 +102,8 @@ export const TaskViewSwitcher = () => {
                 onChange={onKanbanChange}
               />
             </TabsContent>
-            <TabsContent value="calendar" className="mt-0">
-              {JSON.stringify(tasks)}
+            <TabsContent value="calendar" className="mt-0 h-full pb-4">
+              <DataCalendar data={tasks?.documents ?? []} />
             </TabsContent>
           </>
         )}
