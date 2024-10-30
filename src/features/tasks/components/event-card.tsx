@@ -36,7 +36,7 @@ export const EventCard: React.FC<EventCardProps> = ({
   // 이벤트 카드 클릭 핸들러(클릭 시 해당 작업 상세 페이지로 이동)
   const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
-    router.push(`/workspace/${workspaceId}/tasks/${id}`)
+    router.push(`/workspaces/${workspaceId}/tasks/${id}`)
   }
 
   return (
