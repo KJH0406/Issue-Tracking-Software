@@ -130,7 +130,7 @@ export const EditWorkspaceForm = ({
   const [ResetInviteDialog, confirmResetInvite] = useConfirm(
     "⚠️ 워크스페이스 초대 코드 재설정",
     "워크스페이스 초대 코드를 재설정하면 기존 초대 코드는 더 이상 사용할 수 없습니다.",
-    "destructive"
+    "caution"
   )
 
   // 워크스페이스 초대 코드 재설정
@@ -310,7 +310,7 @@ export const EditWorkspaceForm = ({
             <Button
               className="mt-6 w-fit ml-auto"
               size="sm"
-              variant="destructive"
+              variant="caution"
               type="button"
               disabled={isPending || isResettingInviteCode}
               onClick={handleResetInviteCode}

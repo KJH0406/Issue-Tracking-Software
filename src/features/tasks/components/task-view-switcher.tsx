@@ -25,8 +25,14 @@ import { columns } from "./columns"
 import { TaskStatus } from "../types"
 import { useBulkUpdateTask } from "../api/use-bulk-update-task"
 
+interface TaskViewSwitcherProps {
+  hideProjectFilter?: boolean
+}
+
 // 일감 뷰 스위처 컴포넌트
-export const TaskViewSwitcher = () => {
+export const TaskViewSwitcher = ({
+  hideProjectFilter,
+}: TaskViewSwitcherProps) => {
   const { open } = useCreateTaskModal()
 
   // 일감 필터 상태 관리
@@ -85,7 +91,8 @@ export const TaskViewSwitcher = () => {
           </Button>
         </div>
         <DottedSeparator className="my-4" />
-        <DataFilters />
+        {/* 프로젝트 필터 숨김 여부에 따라 데이터 필터 컴포넌트 렌더링 - 내 페이지에서는 프로젝트 필터 숨김 */}
+        <DataFilters hideProjectFilter={hideProjectFilter} />
         <DottedSeparator className="my-4" />
         {isLoadingTasks ? (
           <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
