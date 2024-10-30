@@ -22,7 +22,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <Sidebar />
         </div>
         <div className="lg:pl-[264px] w-full">
-          <div className="mx-auto max-w-screen-2xl h-full">
+          <div className="mx-auto max-w-screen-3xl h-full">
             {/* 화면 상단에 고정된 Navbar */}
             <Navbar />
             <main className="h-full py-8 px-6 flex flex-col">
