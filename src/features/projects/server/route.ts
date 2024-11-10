@@ -117,6 +117,35 @@ const app = new Hono()
     }
   )
 
+  // 개별 프로젝트 가져오기
+  .get("/:projectId", sessionMiddleware, async (c) => {
+    const user = c.get("user")
+    const databases = c.get("databases")
+    const { projectId } = c.req.param()
+
+    // 프로젝트 조회
+    const project = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId
+    )
+
+    // 현재 사용자가 해당 워크스페이스의 멤버인지 확인
+    const member = await getMember({
+      databases,
+      workspaceId: project.workspaceId,
+      userId: user.$id,
+    })
+
+    // 멤버가 아니면 401 Unauthorized 응답
+    if (!member) {
+      return c.json({ error: "unauthorized" }, 401)
+    }
+
+    // 프로젝트 조회 성공
+    return c.json({ data: project })
+  })
+
   // 프로젝트 업데이트(설정 페이지)
   .patch(
     "/:projectId",

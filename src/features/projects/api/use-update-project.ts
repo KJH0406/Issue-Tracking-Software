@@ -20,7 +20,6 @@ type RequestType = InferRequestType<
 
 // 프로젝트 업데이트 훅
 export const useUpdateProject = () => {
-  const router = useRouter()
   // 쿼리 클라이언트 가져오기
   const queryClient = useQueryClient()
 
@@ -42,7 +41,6 @@ export const useUpdateProject = () => {
     onSuccess: ({ data }) => {
       // 프로젝트 업데이트 성공
       toast.success("프로젝트가 업데이트되었습니다.")
-      router.refresh()
       queryClient.invalidateQueries({ queryKey: ["projects"] })
       queryClient.invalidateQueries({ queryKey: ["project", data.$id] })
     },

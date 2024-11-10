@@ -68,14 +68,7 @@ export const EditProjectForm = ({
       image: values.image instanceof File ? values.image : "",
     }
     // 폼 제출
-    mutate(
-      { param: { projectId: initialValues.$id }, form: finalValues },
-      {
-        onSuccess: () => {
-          form.reset()
-        },
-      }
-    )
+    mutate({ param: { projectId: initialValues.$id }, form: finalValues })
   }
 
   // 이미지 업로드
