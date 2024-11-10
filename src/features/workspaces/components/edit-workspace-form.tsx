@@ -75,14 +75,7 @@ export const EditWorkspaceForm = ({
       image: values.image instanceof File ? values.image : "",
     }
     // 폼 제출
-    mutate(
-      { param: { workspaceId: initialValues.$id }, form: finalValues },
-      {
-        onSuccess: () => {
-          form.reset()
-        },
-      }
-    )
+    mutate({ param: { workspaceId: initialValues.$id }, form: finalValues })
   }
 
   // 이미지 업로드

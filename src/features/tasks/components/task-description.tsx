@@ -23,13 +23,17 @@ export const TaskDescription = ({ task }: TaskDescriptionProps) => {
 
   // 수정 저장
   const handleSave = () => {
-    mutate({
-      json: { description: value },
-      param: {
-        taskId: task.$id,
+    mutate(
+      {
+        json: { description: value },
+        param: { taskId: task.$id },
       },
-    })
-    setIsEditing(false)
+      {
+        onSuccess: () => {
+          setIsEditing(false)
+        },
+      }
+    )
   }
 
   return (

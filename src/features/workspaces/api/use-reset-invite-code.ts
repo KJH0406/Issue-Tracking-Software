@@ -2,7 +2,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { InferRequestType, InferResponseType } from "hono"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
 
 // 내부 모듈 임포트
 import { client } from "@/lib/rpc"
@@ -18,7 +17,6 @@ type RequestType = InferRequestType<
 
 // 워크스페이스 초대 코드 재설정 훅
 export const useResetInviteCode = () => {
-  const router = useRouter()
   // 쿼리 클라이언트 가져오기
   const queryClient = useQueryClient()
 
@@ -41,8 +39,6 @@ export const useResetInviteCode = () => {
     onSuccess: ({ data }) => {
       // 워크스페이스 초대 코드 재설정 성공
       toast.success("워크스페이스 초대 코드가 재설정되었습니다.")
-
-      router.refresh()
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
       queryClient.invalidateQueries({ queryKey: ["workspace", data.$id] })
     },

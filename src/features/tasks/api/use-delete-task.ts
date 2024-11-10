@@ -4,7 +4,6 @@ import { InferRequestType, InferResponseType } from "hono"
 import { toast } from "sonner"
 
 import { client } from "@/lib/rpc"
-import { useRouter } from "next/navigation"
 
 // API의 응답과 요청 타입을 추론
 type ResponseType = InferResponseType<
@@ -17,7 +16,6 @@ type RequestType = InferRequestType<
 
 // 일감 삭제 훅
 export const useDeleteTask = () => {
-  const router = useRouter()
   // 쿼리 클라이언트 가져오기
   const queryClient = useQueryClient()
 
@@ -36,7 +34,6 @@ export const useDeleteTask = () => {
     onSuccess: ({ data }) => {
       // 일감 삭제 성공
       toast.success("일감이 삭제되었습니다.")
-      router.refresh() // 페이지 새로고침
       queryClient.invalidateQueries({ queryKey: ["tasks"] }) // 일감 목록 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] }) // 삭제한 일감 쿼리 무효화
     },

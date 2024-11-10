@@ -16,7 +16,6 @@ type RequestType = InferRequestType<
 
 // 워크스페이스 업데이트 훅
 export const useUpdateWorkspace = () => {
-  const router = useRouter()
   // 쿼리 클라이언트 가져오기
   const queryClient = useQueryClient()
 
@@ -38,7 +37,6 @@ export const useUpdateWorkspace = () => {
     onSuccess: ({ data }) => {
       // 워크스페이스 업데이트 성공
       toast.success("워크스페이스가 업데이트되었습니다.")
-      router.refresh()
       // 워크스페이스 목록 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
       // 워크스페이스 쿼리 무효화
