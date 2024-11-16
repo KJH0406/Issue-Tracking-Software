@@ -29,6 +29,9 @@ export const useCreateTask = () => {
     onSuccess: () => {
       // 일감 생성 성공
       toast.success("일감이 생성되었습니다.")
+
+      queryClient.invalidateQueries({ queryKey: ["project-analytics"] })
+      queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] })
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
     },
     onError: () => {

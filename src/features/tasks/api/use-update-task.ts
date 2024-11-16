@@ -38,6 +38,8 @@ export const useUpdateTask = () => {
       // 일감 업데이트 성공
       toast.success("일감이 업데이트되었습니다.")
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
+      queryClient.invalidateQueries({ queryKey: ["project-analytics"] })
+      queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] })
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] })
     },
     onError: () => {

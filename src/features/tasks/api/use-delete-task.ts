@@ -34,6 +34,9 @@ export const useDeleteTask = () => {
     onSuccess: ({ data }) => {
       // 일감 삭제 성공
       toast.success("일감이 삭제되었습니다.")
+
+      queryClient.invalidateQueries({ queryKey: ["project-analytics"] })
+      queryClient.invalidateQueries({ queryKey: ["workspace-analytics"] })
       queryClient.invalidateQueries({ queryKey: ["tasks"] }) // 일감 목록 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] }) // 삭제한 일감 쿼리 무효화
     },

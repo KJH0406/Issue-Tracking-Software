@@ -27,9 +27,9 @@ export const useLogout = () => {
     // 로그인 페이지로 리디렉션
     onSuccess: () => {
       toast.success("로그아웃에 성공했습니다.")
+
       router.refresh()
-      queryClient.invalidateQueries({ queryKey: ["current"] })
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] }) // 워크스페이스 데이터 새로고침
+      queryClient.invalidateQueries()
     },
     onError: () => {
       toast.error("로그아웃에 실패했습니다.")
