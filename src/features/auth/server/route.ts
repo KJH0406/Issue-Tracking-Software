@@ -7,6 +7,7 @@ import { sessionMiddleware } from "@/lib/session-middleware"
 
 import { AUTH_COOKIE } from "../constants"
 import { loginSchema, registerSchema } from "../schema"
+import { ID } from "node-appwrite"
 
 const app = new Hono()
   // 유저 정보 호출
@@ -46,13 +47,13 @@ const app = new Hono()
     // 회원가입 시 유효성 검사
     zValidator("json", registerSchema),
     async (c) => {
-      const { email, password } = c.req.valid("json")
+      const { name, email, password } = c.req.valid("json")
 
       // Appwrite 클라이언트의 Account 객체 접근
       const { account } = await createAdminClient()
 
       // 새로운 사용자를 Appwrite에 등록
-      // const user = await account.create(ID.unique(), email, password, name)
+      await account.create(ID.unique(), email, password, name)
 
       // 로그인 세션 정보 반환
       const session = await account.createEmailPasswordSession(email, password)
