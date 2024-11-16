@@ -6,6 +6,7 @@ import { FaGithub } from "react-icons/fa"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 
+import { signUpWithGithub, signUpWithGoogle } from "@/lib/oauth"
 import { DottedSeparator } from "@/components/dotted-separator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -99,6 +100,7 @@ const SignInCard = () => {
           variant="secondary"
           size="lg"
           className="w-full"
+          onClick={() => signUpWithGoogle()}
         >
           <FcGoogle className="mr-2 size-5" />
           Google로 로그인
@@ -108,6 +110,7 @@ const SignInCard = () => {
           variant="secondary"
           size="lg"
           className="w-full"
+          onClick={() => signUpWithGithub()}
         >
           <FaGithub className="mr-2 size-5" />
           Github로 로그인
