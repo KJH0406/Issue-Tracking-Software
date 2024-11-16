@@ -11,13 +11,16 @@ import {
   WORKSPACE_ID,
   IMAGES_BUCKET_ID,
   MEMBERS_ID,
+  PROJECTS_ID,
+  TASKS_ID,
 } from "@/config"
 
 import { createWorkspaceSchema, updateWorkspaceSchema } from "../schemas"
 import { MemberRole } from "@/features/members/types"
 import { getMember } from "@/features/members/utils"
-
+import { TaskStatus } from "@/features/tasks/types"
 import { Workspace } from "../types"
+import { startOfMonth, endOfMonth, subMonths } from "date-fns"
 
 const app = new Hono()
 
@@ -335,5 +338,190 @@ const app = new Hono()
       return c.json({ data: workspace })
     }
   )
+
+  // 워크스페이스 분석
+  .get("/:workspaceId/analytics", sessionMiddleware, async (c) => {
+    const databases = c.get("databases")
+    const user = c.get("user")
+
+    const { workspaceId } = c.req.param()
+
+    const member = await getMember({
+      databases,
+      workspaceId,
+      userId: user.$id,
+    })
+
+    if (!member) {
+      return c.json({ error: "Unauthorized" }, 401)
+    }
+
+    const now = new Date()
+    const thisMonthStart = startOfMonth(now)
+    const thisMonthEnd = endOfMonth(now)
+    const lastMonthStart = startOfMonth(subMonths(now, 1))
+    const lastMonthEnd = endOfMonth(subMonths(now, 1))
+
+    // 이번 달 작업 목록 조회
+    const thisMonthTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 작업 목록 조회
+    const lastMonthTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 작업 수
+    const taskCount = thisMonthTasks.total
+    // 지난 달 작업 수
+    const taskDifference = taskCount - lastMonthTasks.total
+
+    // 이번 달 할당된 작업 수
+    const thisMonthAssginedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.equal("assigneeId", member.$id),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 할당된 작업 수
+    const lastMonthAssginedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.equal("assigneeId", member.$id),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 할당된 작업 수
+    const assignedTaskCount = thisMonthAssginedTasks.total
+    // 지난 달 할당된 작업 수
+    const assignedTaskDifference =
+      assignedTaskCount - lastMonthAssginedTasks.total
+
+    // 이번 달 완료되지 않은 작업 수
+    const thisMonthIncompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 완료되지 않은 작업 수
+    const lastMonthIncompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 완료되지 않은 작업 수
+    const incompletedTaskCount = thisMonthIncompletedTasks.total
+    // 지난 달 완료되지 않은 작업 수
+    const incompletedTaskDifference =
+      incompletedTaskCount - lastMonthIncompletedTasks.total
+
+    // 이번 달 완료된 작업 수
+    const thisMonthCompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.equal("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 완료된 작업 수
+    const lastMonthCompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.equal("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 완료된 작업 수
+    const completedTaskCount = thisMonthCompletedTasks.total
+    // 지난 달 완료된 작업 수
+    const completedTaskDifference =
+      completedTaskCount - lastMonthCompletedTasks.total
+
+    // 이번 달 연체된 작업 수
+    const thisMonthOverdueTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.lessThan("dueDate", now.toISOString()),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 연체된 작업 수
+    const lastMonthOverdueTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("workspaceId", workspaceId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.lessThan("dueDate", lastMonthEnd.toISOString()),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    const overdueTaskCount = thisMonthOverdueTasks.total
+    const overdueTaskDifference = overdueTaskCount - lastMonthOverdueTasks.total
+
+    return c.json({
+      data: {
+        taskCount,
+        taskDifference,
+        assignedTaskCount,
+        assignedTaskDifference,
+        incompletedTaskCount,
+        incompletedTaskDifference,
+        completedTaskCount,
+        completedTaskDifference,
+        overdueTaskCount,
+        overdueTaskDifference,
+      },
+    })
+  })
 
 export default app

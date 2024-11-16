@@ -114,10 +114,14 @@ const app = new Hono()
       }
 
       // 해당 워크스페이스의 프로젝트 목록 조회
-      const projects = await databases.listDocuments(DATABASE_ID, PROJECTS_ID, [
-        Query.equal("workspaceId", workspaceId), // workspaceId로 필터링
-        Query.orderDesc("$createdAt"), // 생성일 기준 내림차순 정렬
-      ])
+      const projects = await databases.listDocuments<Project>(
+        DATABASE_ID,
+        PROJECTS_ID,
+        [
+          Query.equal("workspaceId", workspaceId), // workspaceId로 필터링
+          Query.orderDesc("$createdAt"), // 생성일 기준 내림차순 정렬
+        ]
+      )
 
       // 조회된 프로젝트 목록 반환
       return c.json({ data: projects })

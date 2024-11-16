@@ -8,7 +8,7 @@ import { DATABASE_ID, WORKSPACE_ID, MEMBERS_ID } from "@/config"
 import { sessionMiddleware } from "@/lib/session-middleware"
 
 import { getMember } from "../utils"
-import { MemberRole } from "../types"
+import { Member, MemberRole } from "../types"
 
 // 워크스페이스의 모든 멤버 목록을 가져옴
 const app = new Hono()
@@ -45,9 +45,11 @@ const app = new Hono()
       }
 
       // 워크스페이스의 모든 멤버를 가져오기
-      const members = await databases.listDocuments(DATABASE_ID, MEMBERS_ID, [
-        Query.equal("workspaceId", workspaceId),
-      ])
+      const members = await databases.listDocuments<Member>(
+        DATABASE_ID,
+        MEMBERS_ID,
+        [Query.equal("workspaceId", workspaceId)]
+      )
 
       // 각 멤버의 상세 정보를 가져와서 추가
       const populatedMembers = await Promise.all(
