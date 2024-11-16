@@ -31,7 +31,7 @@ export const useLogout = () => {
       queryClient.invalidateQueries({ queryKey: ["current"] })
       queryClient.invalidateQueries({ queryKey: ["workspaces"] }) // 워크스페이스 데이터 새로고침
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("로그아웃에 실패했습니다.")
     },
   })

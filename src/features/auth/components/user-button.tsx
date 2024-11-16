@@ -13,7 +13,6 @@ import { DottedSeparator } from "@/components/dotted-separator"
 
 import { useLogout } from "@/features/auth/api/use-logout"
 import { useCurrent } from "@/features/auth/api/use-current"
-import { eachMonthOfInterval } from "date-fns"
 
 // 사용자 버튼 컴포넌트
 export const UserButton = () => {

@@ -1,7 +1,6 @@
 // 외부 라이브러리 임포트
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { InferRequestType, InferResponseType } from "hono"
-import { useRouter } from "next/navigation"
 
 // 토스트 알림 라이브러리 임포트
 import { toast } from "sonner"
@@ -44,7 +43,7 @@ export const useUpdateProject = () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
       queryClient.invalidateQueries({ queryKey: ["project", data.$id] })
     },
-    onError: (error) => {
+    onError: () => {
       // 프로젝트 업데이트 실패
       toast.error("프로젝트 업데이트에 실패했습니다.")
     },

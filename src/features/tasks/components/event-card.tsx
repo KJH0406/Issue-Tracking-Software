@@ -5,10 +5,11 @@ import { MemberThumbnail } from "@/features/members/components/member-thumbnail"
 import { ProjectThumbnail } from "@/features/projects/components/project-thumbnail"
 import { useRouter } from "next/navigation"
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
+import { Member } from "@/features/members/types"
 
 interface EventCardProps {
   title: string
-  assignee: any
+  assignee: Member
   project: Project
   status: TaskStatus
   id: string

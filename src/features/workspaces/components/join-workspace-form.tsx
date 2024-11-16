@@ -66,7 +66,7 @@ export const JoinWorkspaceForm = ({
           워크스페이스에 참여하기
         </CardTitle>
         <CardDescription>
-          <strong>"{initialValues.name}"</strong> 워크스페이스에 참여하세요.
+          <strong>{initialValues.name}</strong> 워크스페이스에 참여하세요.
         </CardDescription>
       </CardHeader>
       <div className="p-7">

@@ -33,12 +33,12 @@ export const useBulkUpdateTask = () => {
 
       return await response.json()
     },
-    onSuccess: ({ data }) => {
+    onSuccess: () => {
       // 일감 업데이트 성공
       toast.success("일감이 업데이트되었습니다.")
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
     },
-    onError: (error) => {
+    onError: () => {
       // 일감 업데이트 실패
       toast.error("일감 업데이트에 실패했습니다.")
     },

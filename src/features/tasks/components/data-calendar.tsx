@@ -17,7 +17,6 @@ import { useState } from "react"
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import "./data-calendar.css"
 import { EventCard } from "./event-card"
-import { CustomToolbar } from "./custom-toolbar"
 import { Button } from "@/components/ui/button"
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 const locales = {

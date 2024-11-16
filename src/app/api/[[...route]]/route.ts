@@ -12,6 +12,8 @@ import tasks from "@/features/tasks/server/route"
 const app = new Hono().basePath("/api")
 
 // 라우트 추가
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
 const routes = app
   .route("/auth", auth)
   .route("/members", members)

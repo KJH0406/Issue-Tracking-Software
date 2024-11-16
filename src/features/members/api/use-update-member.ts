@@ -39,7 +39,7 @@ export const useUpdateMember = () => {
       toast.success("멤버가 업데이트되었습니다.")
       queryClient.invalidateQueries({ queryKey: ["members"] })
     },
-    onError: (error) => {
+    onError: () => {
       // 멤버 업데이트 실패
       toast.error("멤버 업데이트에 실패했습니다.")
     },

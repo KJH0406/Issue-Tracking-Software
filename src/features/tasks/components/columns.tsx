@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreVertical } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Task, TaskStatus } from "../types"
+import { Task } from "../types"
 import { ProjectThumbnail } from "@/features/projects/components/project-thumbnail"
 import { MemberThumbnail } from "@/features/members/components/member-thumbnail"
 import { TaskDate } from "./task-date"

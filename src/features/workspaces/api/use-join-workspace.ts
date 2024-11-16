@@ -42,7 +42,7 @@ export const useJoinWorkspace = () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
       queryClient.invalidateQueries({ queryKey: ["workspace", data.$id] })
     },
-    onError: (error) => {
+    onError: () => {
       // 워크스페이스 참여 실패
       toast.error("워크스페이스 참여에 실패했습니다.")
     },

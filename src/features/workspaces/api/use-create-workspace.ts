@@ -24,7 +24,6 @@ export const useCreateWorkspace = () => {
         throw new Error("워크스페이스 생성에 실패했습니다.")
       }
 
-
       return await response.json()
     },
     onSuccess: () => {
@@ -32,10 +31,10 @@ export const useCreateWorkspace = () => {
       toast.success("워크스페이스가 생성되었습니다.")
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
     },
-    onError: (error) => {
+    onError: () => {
       // 워크스페이스 생성 실패
       toast.error("워크스페이스 생성에 실패했습니다.")
-    }
+    },
   })
 
   return mutation

@@ -83,6 +83,30 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
 
   return (
     <div className="flex flex-col lg:flex-row gap-2 ">
+      {/* 프로젝트 필터 숨김 여부에 따라 프로젝트 필터 렌더링 */}
+      {!hideProjectFilter && (
+        <Select
+          defaultValue={projectId ?? undefined}
+          onValueChange={(value) => onProjectChange(value)}
+        >
+          <SelectTrigger className="w-full lg:w-auto h-8">
+            <div className="flex items-center pr-2">
+              <FolderIcon className="size-4 mr-2" />
+              <SelectValue placeholder="모든 프로젝트" />
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">모든 프로젝트</SelectItem>
+            <SelectSeparator />
+            {/* 프로젝트 선택 가능 목록 */}
+            {projectOptions?.map((project) => (
+              <SelectItem key={project.value} value={project.value}>
+                {project.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
       <Select
         defaultValue={status ?? undefined}
         onValueChange={(value) => onStatusChange(value)}
@@ -124,30 +148,7 @@ export const DataFilters = ({ hideProjectFilter }: DataFiltersProps) => {
           ))}
         </SelectContent>
       </Select>
-      {/* 프로젝트 필터 숨김 여부에 따라 프로젝트 필터 렌더링 */}
-      {!hideProjectFilter && (
-        <Select
-          defaultValue={projectId ?? undefined}
-          onValueChange={(value) => onProjectChange(value)}
-        >
-          <SelectTrigger className="w-full lg:w-auto h-8">
-            <div className="flex items-center pr-2">
-              <FolderIcon className="size-4 mr-2" />
-              <SelectValue placeholder="모든 프로젝트" />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">모든 프로젝트</SelectItem>
-            <SelectSeparator />
-            {/* 프로젝트 선택 가능 목록 */}
-            {projectOptions?.map((project) => (
-              <SelectItem key={project.value} value={project.value}>
-                {project.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
+
       <DatePicker
         placeholder="마감일"
         className="h-8 w-full lg:w-auto"

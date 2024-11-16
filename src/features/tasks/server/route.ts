@@ -386,6 +386,10 @@ const app = new Hono()
       // 워크스페이스 ID 추출 (Set에서 첫 번째 값)
       const workspaceId = workspaceIds.values().next().value
 
+      if (!workspaceId) {
+        return c.json({ error: "워크스페이스 ID를 찾을 수 없습니다." }, 400)
+      }
+
       // 현재 사용자가 해당 워크스페이스의 멤버인지 확인
       const member = await getMember({
         databases,

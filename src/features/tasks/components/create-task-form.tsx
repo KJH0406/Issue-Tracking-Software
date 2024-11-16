@@ -3,7 +3,6 @@
 // 외부 라이브러리 임포트
 import { z } from "zod"
 import { useForm } from "react-hook-form"
-import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 // 유틸리티 및 UI 컴포넌트 임포트
@@ -27,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { DialogTitle } from "@/components/ui/dialog"
 import { DatePicker } from "@/components/date-picker"
 import { MemberThumbnail } from "@/features/members/components/member-thumbnail"
 
@@ -52,7 +50,6 @@ export const CreateTaskForm = ({
   memberOptions,
 }: CreateTaskFormProps) => {
   const workspaceId = useWorkspaceId()
-  const router = useRouter()
 
   // 일감 생성 훅
   const { mutate, isPending } = useCreateTask()

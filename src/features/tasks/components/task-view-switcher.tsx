@@ -24,6 +24,7 @@ import { columns } from "./columns"
 // 타입
 import { TaskStatus } from "../types"
 import { useBulkUpdateTask } from "../api/use-bulk-update-task"
+import { useProjectId } from "@/features/projects/hooks/use-project-id"
 
 interface TaskViewSwitcherProps {
   hideProjectFilter?: boolean
@@ -49,10 +50,13 @@ export const TaskViewSwitcher = ({
   // 현재 활성화된 작업 공간의 ID를 가져오기
   const workspaceId = useWorkspaceId()
 
+  // 현재 활성화된 프로젝트의 ID를 가져오기
+  const paramProjectId = useProjectId()
+
   // 현재 작업 공간의 일감 목록을 가져오기
   const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({
     workspaceId,
-    projectId,
+    projectId: paramProjectId || projectId,
     assigneeId,
     status,
     dueDate,
@@ -91,7 +95,7 @@ export const TaskViewSwitcher = ({
           </Button>
         </div>
         <DottedSeparator className="my-4" />
-        {/* 프로젝트 필터 숨김 여부에 따라 데이터 필터 컴포넌트 렌더링 - 내 페이지에서는 프로젝트 필터 숨김 */}
+        {/* 프로젝트 필터 숨김 여부에 따라 데이터 필터 컴포넌트 렌더링 */}
         <DataFilters hideProjectFilter={hideProjectFilter} />
         <DottedSeparator className="my-4" />
         {isLoadingTasks ? (

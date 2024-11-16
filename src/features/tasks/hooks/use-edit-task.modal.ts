@@ -1,4 +1,4 @@
-import { useQueryState, parseAsBoolean, parseAsString } from "nuqs"
+import { useQueryState, parseAsString } from "nuqs"
 
 // 일감 업데이트 모달 훅
 export const useEditTaskModal = () => {

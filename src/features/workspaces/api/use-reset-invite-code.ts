@@ -42,7 +42,7 @@ export const useResetInviteCode = () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
       queryClient.invalidateQueries({ queryKey: ["workspace", data.$id] })
     },
-    onError: (error) => {
+    onError: () => {
       // 워크스페이스 초대 코드 재설정 실패
       toast.error("워크스페이스 초대 코드 재설정에 실패했습니다.")
     },

@@ -39,7 +39,7 @@ export const useDeleteWorkspace = () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] })
       queryClient.invalidateQueries({ queryKey: ["workspace", data.$id] })
     },
-    onError: (error) => {
+    onError: () => {
       // 워크스페이스 삭제 실패
       toast.error("워크스페이스 삭제에 실패했습니다.")
     },

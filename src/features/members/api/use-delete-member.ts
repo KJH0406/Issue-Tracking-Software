@@ -38,7 +38,7 @@ export const useDeleteMember = () => {
       toast.success("멤버가 삭제되었습니다.")
       queryClient.invalidateQueries({ queryKey: ["members"] })
     },
-    onError: (error) => {
+    onError: () => {
       // 멤버 삭제 실패
       toast.error("멤버 삭제에 실패했습니다.")
     },

@@ -1,5 +1,4 @@
 import { Hono } from "hono"
-import { ID } from "node-appwrite"
 import { zValidator } from "@hono/zod-validator"
 import { deleteCookie, setCookie } from "hono/cookie"
 
@@ -47,13 +46,13 @@ const app = new Hono()
     // 회원가입 시 유효성 검사
     zValidator("json", registerSchema),
     async (c) => {
-      const { name, email, password } = c.req.valid("json")
+      const { email, password } = c.req.valid("json")
 
       // Appwrite 클라이언트의 Account 객체 접근
       const { account } = await createAdminClient()
 
       // 새로운 사용자를 Appwrite에 등록
-      const user = await account.create(ID.unique(), email, password, name)
+      // const user = await account.create(ID.unique(), email, password, name)
 
       // 로그인 세션 정보 반환
       const session = await account.createEmailPasswordSession(email, password)

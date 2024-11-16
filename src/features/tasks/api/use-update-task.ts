@@ -40,7 +40,7 @@ export const useUpdateTask = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] })
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] })
     },
-    onError: (error) => {
+    onError: () => {
       // 일감 업데이트 실패
       toast.error("일감 업데이트에 실패했습니다.")
     },

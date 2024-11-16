@@ -37,7 +37,7 @@ export const useDeleteTask = () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] }) // 일감 목록 쿼리 무효화
       queryClient.invalidateQueries({ queryKey: ["task", data.$id] }) // 삭제한 일감 쿼리 무효화
     },
-    onError: (error) => {
+    onError: () => {
       // 일감 삭제 실패
       toast.error("일감 삭제에 실패했습니다.")
     },

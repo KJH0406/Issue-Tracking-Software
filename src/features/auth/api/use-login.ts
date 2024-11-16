@@ -28,9 +28,9 @@ export const useLogin = () => {
       router.refresh()
       queryClient.invalidateQueries({ queryKey: ["current"] })
     },
-    onError: (error) => {
+    onError: () => {
       toast.error("로그인에 실패했습니다.")
-    }
+    },
   })
 
   return mutation

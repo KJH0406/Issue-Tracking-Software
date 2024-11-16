@@ -34,7 +34,7 @@ export const useCreateProject = () => {
       toast.success("프로젝트가 생성되었습니다.")
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
-    onError: (error) => {
+    onError: () => {
       // 프로젝트 생성 실패
       toast.error("프로젝트 생성에 실패했습니다.")
     },

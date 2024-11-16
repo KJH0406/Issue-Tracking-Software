@@ -27,7 +27,6 @@ import {
 } from "@/components/ui/form"
 import { registerSchema } from "../schema"
 import { useRegister } from "../api/use-register"
-import { client } from "@/lib/rpc"
 
 const SignUpCard = () => {
   const { mutate, isPending } = useRegister()

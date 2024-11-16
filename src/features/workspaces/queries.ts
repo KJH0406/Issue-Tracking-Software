@@ -28,8 +28,3 @@ export const getWorkspaces = async () => {
 
   return workspaces
 }
-
-// 워크스페이스 조회를 위한 속성
-interface GetWorkspaceProps {
-  workspaceId: string // 조회할 워크스페이스의 고유 ID
-}

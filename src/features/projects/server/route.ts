@@ -17,7 +17,6 @@ import { createProjectSchema, updateProjectSchema } from "../schemas"
 import { Project } from "../types"
 
 // 멤버 관련
-import { MemberRole } from "@/features/members/types"
 import { TaskStatus } from "@/features/tasks/types"
 
 const app = new Hono()
