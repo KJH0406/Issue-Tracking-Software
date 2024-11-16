@@ -1,17 +1,24 @@
+// 외부 라이브러리
 import { z } from "zod"
 import { Hono } from "hono"
 import { ID, Query } from "node-appwrite"
 import { zValidator } from "@hono/zod-validator"
+import { endOfMonth, startOfMonth, subMonths } from "date-fns"
 
+// 내부 유틸리티
 import { getMember } from "@/features/members/utils"
-
 import { sessionMiddleware } from "@/lib/session-middleware"
-import { DATABASE_ID, IMAGES_BUCKET_ID, PROJECTS_ID } from "@/config"
 
+// 설정 값
+import { DATABASE_ID, IMAGES_BUCKET_ID, PROJECTS_ID, TASKS_ID } from "@/config"
+
+// 프로젝트 관련
 import { createProjectSchema, updateProjectSchema } from "../schemas"
 import { Project } from "../types"
 
+// 멤버 관련
 import { MemberRole } from "@/features/members/types"
+import { TaskStatus } from "@/features/tasks/types"
 
 const app = new Hono()
   .post(
@@ -250,6 +257,197 @@ const app = new Hono()
     await databases.deleteDocument(DATABASE_ID, PROJECTS_ID, projectId)
 
     return c.json({ data: { $id: existingProject.$id } })
+  })
+
+  // 프로젝트 분석
+  .get("/:projectId/analytics", sessionMiddleware, async (c) => {
+    const databases = c.get("databases")
+    const user = c.get("user")
+
+    const { projectId } = c.req.param()
+
+    const project = await databases.getDocument<Project>(
+      DATABASE_ID,
+      PROJECTS_ID,
+      projectId
+    )
+
+    const member = await getMember({
+      databases,
+      workspaceId: project.workspaceId,
+      userId: user.$id,
+    })
+
+    if (!member) {
+      return c.json({ error: "Unauthorized" }, 401)
+    }
+
+    const now = new Date()
+    const thisMonthStart = startOfMonth(now)
+    const thisMonthEnd = endOfMonth(now)
+    const lastMonthStart = startOfMonth(subMonths(now, 1))
+    const lastMonthEnd = endOfMonth(subMonths(now, 1))
+
+    // 이번 달 작업 목록 조회
+    const thisMonthTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 작업 목록 조회
+    const lastMonthTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 작업 수
+    const taskCount = thisMonthTasks.total
+    // 지난 달 작업 수
+    const taskDifference = taskCount - lastMonthTasks.total
+
+    // 이번 달 할당된 작업 수
+    const thisMonthAssginedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.equal("assigneeId", member.$id),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 할당된 작업 수
+    const lastMonthAssginedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.equal("assigneeId", member.$id),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 할당된 작업 수
+    const assignedTaskCount = thisMonthAssginedTasks.total
+    // 지난 달 할당된 작업 수
+    const assignedTaskDifference =
+      assignedTaskCount - lastMonthAssginedTasks.total
+
+    // 이번 달 완료되지 않은 작업 수
+    const thisMonthIncompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 완료되지 않은 작업 수
+    const lastMonthIncompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 완료되지 않은 작업 수
+    const incompletedTaskCount = thisMonthIncompletedTasks.total
+    // 지난 달 완료되지 않은 작업 수
+    const incompletedTaskDifference =
+      incompletedTaskCount - lastMonthIncompletedTasks.total
+
+    // 이번 달 완료된 작업 수
+    const thisMonthCompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.equal("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 완료된 작업 수
+    const lastMonthCompletedTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.equal("status", TaskStatus.DONE),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    // 이번 달 완료된 작업 수
+    const completedTaskCount = thisMonthCompletedTasks.total
+    // 지난 달 완료된 작업 수
+    const completedTaskDifference =
+      completedTaskCount - lastMonthCompletedTasks.total
+
+    // 이번 달 연체된 작업 수
+    const thisMonthOverdueTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.lessThan("dueDate", now.toISOString()),
+        Query.greaterThanEqual("$createdAt", thisMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", thisMonthEnd.toISOString()),
+      ]
+    )
+
+    // 지난 달 연체된 작업 수
+    const lastMonthOverdueTasks = await databases.listDocuments(
+      DATABASE_ID,
+      TASKS_ID,
+      [
+        Query.equal("projectId", projectId),
+        Query.notEqual("status", TaskStatus.DONE),
+        Query.lessThan("dueDate", lastMonthEnd.toISOString()),
+        Query.greaterThanEqual("$createdAt", lastMonthStart.toISOString()),
+        Query.lessThanEqual("$createdAt", lastMonthEnd.toISOString()),
+      ]
+    )
+
+    const overdueTaskCount = thisMonthOverdueTasks.total
+    const overdueTaskDifference = overdueTaskCount - lastMonthOverdueTasks.total
+
+    return c.json({
+      data: {
+        taskCount,
+        taskDifference,
+        assignedTaskCount,
+        assignedTaskDifference,
+        incompletedTaskCount,
+        incompletedTaskDifference,
+        completedTaskCount,
+        completedTaskDifference,
+        overdueTaskCount,
+        overdueTaskDifference,
+      },
+    })
   })
 
 export default app
