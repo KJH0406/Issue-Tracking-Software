@@ -14,10 +14,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "워크웨이브",
     description: "업무의 흐름을 혁신하다",
-    url: "https://workwave.vercel.app", // 사이트 URL
+    url: "https://myworkwave.vercel.app", // 사이트 URL
     images: [
       {
-        url: "https://workwave.vercel.app/thumbnail.png", // 썸네일 이미지 URL
+        url: "https://myworkwave.vercel.app/thumbnail.png", // 썸네일 이미지 URL
         width: 1200, // 권장 크기
         height: 630, // 권장 크기
         alt: "워크웨이브 썸네일 이미지",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "워크웨이브",
     description: "업무의 흐름을 혁신하다",
-    images: ["https://workwave.vercel.app/thumbnail.png"],
+    images: ["https://myworkwave.vercel.app/thumbnail.png"],
   },
 }
 
