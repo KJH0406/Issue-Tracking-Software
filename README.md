@@ -1,8 +1,19 @@
-# 워크웨이브(WorkWave) - "업무의 흐름을 혁신하다"
+# 워크웨이브(WorkWave)
+
+## 접속 링크 : [업무의 흐름을 혁신하다, 워크웨이브](https://myworkwave.vercel.app)
 
 ## 소개 👋
 
 워크스페이스, 프로젝트/에픽, 작업, 칸반 보드, 캘린더 등 다양한 기능을 갖춘 풀스택 애플리케이션으로, 팀 협업과 프로젝트 추적을 위한 종합적인 솔루션을 제공합니다.
+![workwave-logo](./public/thumbnail.png)
+
+## 시스템 아키텍처
+
+![workwave-architecture](./public/architecture.png)
+
+## ERD
+
+![workwave-erd](./public/erd.png)
 
 ## 주요 기능 ✨
 
